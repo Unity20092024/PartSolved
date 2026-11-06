@@ -325,7 +325,7 @@ test("guided all-unknown journey and no-candidate path provide useful guidance",
     .check();
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Possible category: Not Sure" }),
+    page.getByRole("heading", { name: "Still Not Sure? We Can Help You Figure It Out." }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Use these answers" }).click();
   await detailsToReview(page);

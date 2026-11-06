@@ -11,6 +11,7 @@ import {
   validateDraft,
 } from "@/lib/intake";
 import { categoryLabel, getPartType, partTypeLabel } from "@/config/part-types";
+import { AssistanceNotes } from "./assistance/assistance-notes";
 import { guidedLabel } from "@/config/guided";
 export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
   const { photo, draft, guided } = usePhoto();
@@ -88,6 +89,7 @@ export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
       optionalPhoto={draft.source === "guided"}
       back={nextSteps ? "/find-part/review" : "/find-part/details"}
     >
+      <AssistanceNotes />
       {!photo && draft.source === "photo" ? (
         <PhotoRecovery />
       ) : !request ? (
