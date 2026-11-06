@@ -4,5 +4,8 @@ export const photography: {
   measurement: { src: string; alt: string } | null;
 } = {
   hero: null,
-  measurement: null,
+  measurement: {
+    src: "/images/window-sash-measurement.webp",
+    alt: "A wooden window sash being measured with a metric ruler",
+  },
 };

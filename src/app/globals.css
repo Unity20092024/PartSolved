@@ -554,7 +554,9 @@ button:disabled {
   background: #d7d9db;
 }
 .category-image img {
-  object-fit: cover;
+  object-fit: contain;
+  padding: 6px;
+  background: #fff;
 }
 .category-image .photography-slot {
   gap: 4px;
@@ -662,6 +664,7 @@ button:disabled {
 }
 .guide-thumbnail img {
   object-fit: cover;
+  object-position: right 70%;
 }
 .guide-thumbnail .photography-slot {
   padding: 8px;
