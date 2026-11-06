@@ -71,3 +71,11 @@ A local `screenshots.zip` bundles the captures. These artifacts are intentionall
 - **Intentionally unavailable:** cross-refresh persistence, server photo submission, AI recognition, supplier catalog matching, verified compatibility, prices/stock, affiliate checkout, accounts, and video guides.
 - Measurement prompts remain provisional and need manufacturer-documentation verification before a real catalog/matching integration.
 - No merge or manual production deployment is performed for this milestone. Existing Git integration may create a feature-branch preview automatically after push.
+
+## Automatic preview after push
+
+The existing Vercel Git integration reported a **Ready** preview for the Milestone 2 branch commit `d7facb1`:
+
+https://partsolved-git-feat-milestone-2-p-f3f4f5-dees-projects-ac22187b.vercel.app
+
+A normal read-only request returned HTTP 302 to `vercel.com/sso-api`, confirming that this preview is protected by Vercel SSO. Its deployed browser flow was not tested through that protection; use a signed-in authorized Vercel account to review it. Team API access also remained blocked. No protection settings, trusted-source rules, or credentials were changed, and no manual deployment was triggered. The full interaction verification above was performed against the local production build.

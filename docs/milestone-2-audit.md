@@ -54,3 +54,7 @@ See the pull request and `docs/milestone-2-verification.md` for final results an
 A regression check reproduced stale markings when Guided Finder answers were revised after their first handoff. The draft now tracks the last automatically copied marking: guided revisions update that value, while a later manual correction remains untouched. Both observations can be reviewed without silent overwrites. Inactive guided notes/markings are excluded from the normalized future matching request but retained in the in-tab editor.
 
 Progress indicators use actual completion state. A guided journey without a photograph marks the photo as optional and not added, rather than displaying a completed-photo checkmark. Error summaries receive focus, native inputs remain keyboard accessible, and contextual edit links target the relevant form sections.
+
+## Delivery deployment evidence
+
+After the authorized feature-branch push, the existing Git integration created a Ready Vercel preview for Milestone 2. A read-only request to its exact bot-provided URL redirected to Vercel SSO (`vercel.com/sso-api`). This is a deployment-access limitation, not an application-generated failure. Protection was left intact; local production-build verification and the protected preview's Ready status are reported separately.
