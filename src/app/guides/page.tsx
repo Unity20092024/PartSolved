@@ -5,19 +5,49 @@ export default function GuidesPage() {
   return (
     <ScaffoldPage
       title="How to Identify Your Part"
-      description="Simple guides, photos, and measurement tips are planned for a future release."
+      description="Start with clear photos, visible markings, and measurements you can safely obtain."
     >
-      <div className="scaffold-card">
-        <h2>Guides are being prepared</h2>
-        <p>
-          The illustrated identification guides and video library are not
-          available yet. For now, you can select a clear photo of your part and
-          keep it locally in your browser.
-        </p>
-        <Link className="button button-primary" href="/#photo-upload">
-          Select a part photo
+      <div className="next-action-grid">
+        <Link className="intake-card next-action" href="/guides/measurements">
+          <h2>Measurement &amp; Identification Help</h2>
+          <p>
+            Learn screw-hole spacing, roller and housing dimensions, balance
+            measurements, backsets, and orientation.
+          </p>
+          <span className="measurement-help">View measurement topics →</span>
+        </Link>
+        <Link className="intake-card next-action" href="/find-part/guided">
+          <h2>Guided Finder</h2>
+          <p>
+            Use a few questions to narrow down a possible hardware family when
+            you don’t know its name.
+          </p>
+          <span className="measurement-help">Start Guided Finder →</span>
         </Link>
       </div>
+      <section className="intake-card guide-section">
+        <h2>Take useful identification photos</h2>
+        <ul>
+          <li>
+            Show the whole part and where it is installed, if safely accessible.
+          </li>
+          <li>
+            Add clear views of markings, mounting holes, end fittings, and the
+            opposite side.
+          </li>
+          <li>
+            Keep your original observations and label any reference points you
+            measured.
+          </li>
+        </ul>
+        <p>
+          You can select one local photo at a time. Video guides and automated
+          matching are not connected.
+        </p>
+        <Link className="button button-primary" href="/#photo-upload">
+          Take or upload a photo
+        </Link>
+      </section>
     </ScaffoldPage>
   );
 }
