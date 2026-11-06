@@ -16,7 +16,7 @@ test("homepage renders reference copy and all category links", async ({
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
-  await expect(page).toHaveTitle("PartSolved™ | Window & Door Parts Finder");
+  await expect(page).toHaveTitle("PartSolved™ | The Part Finder");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Take a Picture.Find the RIGHT PART.",
   );
@@ -58,15 +58,25 @@ test("local photo preview, replacement, invalid replacement, remove and refresh 
   );
   await expect(page.locator("figcaption")).toHaveText("replacement.png");
   await page.getByRole("link", { name: "Continue", exact: true }).click();
+  await expect(page).toHaveURL("/find-part/preview");
+  await expect(page.getByAltText("Your selected part photo")).toBeVisible();
+  await page.getByRole("link", { name: "Continue to Add Details" }).click();
   await expect(page).toHaveURL("/find-part/details");
   await expect(page.getByAltText("Your selected part photo")).toBeVisible();
-  await page.getByRole("link", { name: "Replace photo" }).click();
-  await page.getByRole("button", { name: "Remove image" }).click();
+  const replace = page.waitForEvent("filechooser");
+  await page
+    .getByRole("button", { name: "Replace Photo", exact: true })
+    .click();
+  await (await replace).setFiles({ ...photo, name: "detail-replacement.png" });
+  await expect(page.locator("figcaption")).toHaveText("detail-replacement.png");
+  await page.getByRole("button", { name: "Remove Photo", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Take a Photo of Your Part" }),
+    page.getByRole("heading", { name: "Your photo is no longer available" }),
   ).toBeVisible();
   await upload(page).setInputFiles(photo);
-  await page.getByRole("link", { name: "Continue", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Your Photo", exact: true }),
+  ).toBeVisible();
   await page.reload();
   await expect(
     page.getByRole("heading", { name: "Your photo is no longer available" }),
@@ -83,7 +93,7 @@ test("validates oversized, empty, damaged and unsupported images", async ({
     mimeType: "image/jpeg",
     buffer: Buffer.alloc(10 * 1024 * 1024 + 1),
   });
-  await expect(page.locator("#photo-error")).toContainText("10 MB or less");
+  await expect(page.locator("#photo-error")).toContainText("10 MiB or less");
   await upload(page).setInputFiles({
     name: "empty.png",
     mimeType: "image/png",
@@ -136,10 +146,10 @@ test("search is usable and dialogs support keyboard dismissal and focus restorat
     .getByLabel("Part name, number, or description")
     .fill("window latch");
   await page.getByRole("button", { name: "Search", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText(
+  await expect(dialog.getByRole("status")).toContainText(
     "Catalog search is not connected",
   );
-  await expect(page.getByRole("status")).toContainText("window latch");
+  await expect(dialog.getByRole("status")).toContainText("window latch");
   await page.keyboard.press("Escape");
   await expect(dialog).not.toBeVisible();
   await expect(opener).toBeFocused();
@@ -179,7 +189,7 @@ test("navigation, favorites and account states are reachable", async ({
   await expect(page).toHaveURL("/find-part/guided");
   await expect(
     page.getByRole("heading", {
-      name: "The guided finder is not available yet",
+      name: "Where is the part located?",
     }),
   ).toBeVisible();
   await page.goto("/categories/unknown");
@@ -195,7 +205,7 @@ test("no horizontal overflow at target widths, with screenshots", async ({
     testInfo.project.name.includes("mobile"),
     "Covered by desktop viewport resizing",
   );
-  for (const width of [320, 375, 540, 699, 768, 1024, 1280]) {
+  for (const width of [320, 375, 390, 430, 540, 699, 768, 1024, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();

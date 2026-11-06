@@ -4,7 +4,7 @@ import { PhotoProvider } from "@/components/part-finder/photo-provider";
 import "./globals.css";
 export const metadata: Metadata = {
   title: {
-    default: "PartSolved™ | Window & Door Parts Finder",
+    default: "PartSolved™ | The Part Finder",
     template: "%s | PartSolved™",
   },
   description:

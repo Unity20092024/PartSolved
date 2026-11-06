@@ -31,12 +31,15 @@ export default async function CategoryPage({
       <div className="scaffold-card">
         <h2>Our catalog is on the way</h2>
         <p>
-          Products, availability, and pricing have not been connected yet. You
-          can select a part photo to prepare for the upcoming identification
-          flow.
+          Products, availability, and pricing have not been connected yet. Use
+          the photo intake to record identification details, or try Guided
+          Finder.
         </p>
         <Link href="/#photo-upload" className="button button-primary">
           Select a part photo
+        </Link>
+        <Link href="/find-part/guided" className="button button-secondary">
+          Use Guided Finder
         </Link>
       </div>
     </ScaffoldPage>
