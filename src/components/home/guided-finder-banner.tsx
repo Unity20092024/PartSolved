@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, BookOpen, Play, Wrench } from "lucide-react";
+import { ArrowRight, BookOpen, Wrench } from "lucide-react";
 import { PhotographySlot } from "@/components/ui/photography-slot";
 import { photography } from "@/config/photography";
 export function GuidedFinderBanner() {
@@ -60,7 +60,7 @@ export function GuidedFinderBanner() {
             <PhotographySlot description="Measuring a window" />
           )}
           <span className="play-icon" aria-hidden="true">
-            <Play size={22} fill="currentColor" />
+            <BookOpen size={18} />
           </span>
         </div>
       </Link>

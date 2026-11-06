@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef, useState, useEffect, type ChangeEvent } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -12,49 +11,13 @@ import {
 } from "lucide-react";
 import { usePhoto } from "./photo-provider";
 import { PhotoPreview } from "./photo-preview";
-import {
-  validatePhotoDecoding,
-  validatePhotoFile,
-} from "@/lib/photo-validation";
+import { usePhotoSelection } from "./use-photo-selection";
+import { PhotoInputs, PhotoMessages } from "./photo-inputs";
 
 export function PhotoUploadCard() {
-  const { photo, setPhoto } = usePhoto();
-  const camera = useRef<HTMLInputElement>(null);
-  const upload = useRef<HTMLInputElement>(null);
-  const generation = useRef(0);
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  useEffect(
-    () => () => {
-      generation.current += 1;
-    },
-    [],
-  );
-  async function selectPhoto(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file) return;
-    const current = ++generation.current;
-    const issue = validatePhotoFile(file);
-    setError("");
-    if (issue) {
-      setError(issue);
-      setBusy(false);
-      return;
-    }
-    setBusy(true);
-    try {
-      await validatePhotoDecoding(file);
-      if (current === generation.current) setPhoto(file);
-    } catch {
-      if (current === generation.current)
-        setError(
-          "We couldn’t open this image. It may be damaged or unsupported by your browser. Try a JPEG, PNG, or WebP photo.",
-        );
-    } finally {
-      if (current === generation.current) setBusy(false);
-    }
-  }
+  const selection = usePhotoSelection();
+  const { photo, camera, upload, busy } = selection;
+  const { setDraft } = usePhoto();
   return (
     <section
       id="photo-upload"
@@ -62,24 +25,11 @@ export function PhotoUploadCard() {
       aria-labelledby="upload-heading"
       aria-busy={busy}
     >
-      <input
-        ref={camera}
-        className="sr-only"
-        tabIndex={-1}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        aria-label="Take a photo of your part"
-        onChange={selectPhoto}
-      />
-      <input
-        ref={upload}
-        className="sr-only"
-        tabIndex={-1}
-        type="file"
-        accept="image/*"
-        aria-label="Upload a photo of your part"
-        onChange={selectPhoto}
+      <PhotoInputs
+        cameraRef={selection.camera}
+        uploadRef={selection.upload}
+        onSelect={selection.selectPhoto}
+        onCancel={selection.cancel}
       />
       {photo ? (
         <>
@@ -94,22 +44,19 @@ export function PhotoUploadCard() {
               <RefreshCw size={16} aria-hidden="true" />
               Replace image
             </button>
-            <button
-              className="text-button"
-              onClick={() => {
-                generation.current += 1;
-                setPhoto(null);
-                setError("");
-                setBusy(false);
-              }}
-            >
+            <button className="text-button" onClick={selection.removePhoto}>
               <Trash2 size={16} aria-hidden="true" />
               Remove image
             </button>
           </div>
           <Link
             className="button button-primary continue-button"
-            href="/find-part/details"
+            href="/find-part/preview"
+            aria-disabled={busy}
+            onClick={(event) => {
+              if (busy) event.preventDefault();
+              else setDraft((previous) => ({ ...previous, source: "photo" }));
+            }}
           >
             Continue
             <ArrowRight size={20} aria-hidden="true" />
@@ -152,19 +99,10 @@ export function PhotoUploadCard() {
           </button>
         </>
       )}
-      {busy && (
-        <p className="photo-status" role="status">
-          Checking your photo…
-        </p>
-      )}
-      {error && (
-        <p id="photo-error" className="photo-error" role="alert">
-          {error}
-        </p>
-      )}
+      <PhotoMessages selection={selection} />
       {!photo && (
         <p className="upload-help">
-          Images up to 10 MB · stays in your browser
+          JPEG, PNG, WebP · up to 10 MiB · browser only
         </p>
       )}
     </section>

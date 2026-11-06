@@ -1,12 +1,8 @@
-# PartSolved-
+# PartSolved™ — The Part Finder
 
-Windows/Doors Photo Identification Application
+Window and door replacement-hardware identification intake, built incrementally on the original PartSolved application.
 
-## Milestone 1: Application foundation and homepage
-
-Next.js App Router, React, strict TypeScript, Tailwind CSS, and Lucide React. No backend, account system, supplier connection, checkout, or photo matching is implemented.
-
-### Run locally
+## Run locally
 
 Use Node.js 22 or later (verified with Node 24) and npm:
 
@@ -15,16 +11,16 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:3000. To preview the production build:
+Open http://localhost:3000. Production preview:
 
 ```sh
 npm run build
 npm start
 ```
 
-No environment variables or API keys are required. The project is ready for standard Next.js hosting on Vercel, but this milestone does not provision or deploy services.
+No environment variables, database, authentication, or paid services are needed. Existing Vercel Git integration is retained; do not deploy production or merge automatically.
 
-### Checks
+## Checks
 
 ```sh
 npm run lint
@@ -34,31 +30,67 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Browser tests start the production server, so build first. If Chromium is already installed, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to its absolute path instead of downloading a browser. Tests cover desktop and mobile Chromium, file pickers, validation, local preview and replacement, route navigation, recovery after refresh, keyboard dismissal, focus restoration, and overflow from 320px to 1280px. Responsive screenshots and failure traces are saved under `test-results/` (not committed).
+Build before browser tests. To use an existing system browser, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to its absolute path. Tests use desktop and mobile Chromium projects. Screenshots/traces are written to ignored `test-results/`; curated workflow screenshots may be copied to ignored `artifacts/milestone-2/` for review.
 
-ESLint 9 is used because the React, import, and accessibility plugins bundled with the current Next.js ESLint config do not yet declare ESLint 10 support. Do not upgrade it independently without checking those peer dependencies.
+ESLint 9 remains because the installed Next.js React/import/accessibility plugins do not declare ESLint 10 compatibility. Package versions and lockfile are preserved.
 
-### Temporary photo handling
+## Customer journey
 
-The camera input uses `accept="image/*" capture="environment"`; the upload input has no capture preference. Camera support depends on the browser/device, with the native file picker as the fallback. Photos must be nonempty browser-decodable images up to 10 MiB; SVG is excluded as a non-photographic format.
+1. From the homepage, take or upload a JPEG, PNG, or WebP image (maximum 10 MiB). Mobile camera capture depends on browser support; a separate upload input never requests camera access.
+2. Review the selected image, replace/retake it, or remove it. Continue to the dedicated photo-preview route, then Add Details.
+3. Select a category and a part type, or Not Sure. The form shows relevant provisional measurements, units, unknown choices, markings, and optional problem/finish/brand/orientation details.
+4. Review and edit every section. Missing and unknown information is visible and does not fabricate a match.
+5. Continue to useful next actions: improve details, read contextual measurement guidance, browse a category, or use Guided Finder.
 
-Files stay in a React context under the shared root layout, surviving client-side navigation to `/find-part/details`. Refreshing, closing the tab, or loading the URL in another tab discards them and shows a recovery action. Preview object URLs are revoked on replacement/unmount. No photo bytes are uploaded or stored in localStorage, cookies, or a database.
+Guided Finder can also start without a photo. Its five steps ask about location, function, appearance, measurements/markings, and review. It suggests only a possible category and transfers those choices to an editable intake. Insufficient information leads to guidance, not fake results.
 
-### Routes and component boundaries
+## Routes
 
-- `/`: reference-based homepage, responsive navigation, photo capture/upload, category cards, and guidance banner.
-- `/windows`, `/doors`: category landing scaffolds.
-- `/categories/window-hardware`, `/categories/door-hardware`, `/categories/window-parts`, `/categories/door-parts`: honest empty catalog scaffolds.
-- `/find-part/details`: local photo handoff and recovery state.
-- `/find-part/guided`, `/guides`, `/support`: clearly labeled initial scaffolds.
-- Search, favorites, and account use accessible native dialog panels. Search accepts input but explicitly states the catalog is not connected.
+| Route                                                                                                            | Purpose                                                                                               |
+| ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `/`                                                                                                              | Existing photographic homepage and camera/upload entry                                                |
+| `/find-part/preview`                                                                                             | Dedicated preview, retake/replace/remove, and recovery                                                |
+| `/find-part/details`                                                                                             | Dynamic editable identification form                                                                  |
+| `/find-part/guided`                                                                                              | Five-step guided questionnaire and answer review                                                      |
+| `/find-part/review`                                                                                              | Photo, category, measurements, markings, notes, missing information, and edits                        |
+| `/find-part/next-steps`                                                                                          | Useful guidance/category/finder actions with an explicit matching-unavailable notice                  |
+| `/guides`                                                                                                        | Identification-guide hub                                                                              |
+| `/guides/measurements`                                                                                           | Screw spacing, overall sizes, rollers, housings, balances, end fittings, backsets, and orientation    |
+| `/windows`, `/doors`                                                                                             | Existing category landing pages                                                                       |
+| `/categories/window-hardware`, `/categories/door-hardware`, `/categories/window-parts`, `/categories/door-parts` | Existing stable category routes; honest catalog-unavailable states with working intake/finder actions |
+| `/support`                                                                                                       | Camera/browser fallback help, privacy, progress, guides, and future supplier support explanation      |
 
-`src/components/` separates layout, homepage, UI, and part-finder features. `src/config/categories.ts` centralizes category presentation metadata and stable slugs; it contains no inventory or prices. `src/config/photography.ts` holds the hero and measurement image configuration. Shared brand and layout tokens live in `src/app/globals.css`.
+Search, favorites, and account retain their honest initial dialog states. Catalog search and accounts are not connected. The education thumbnail now links to written guidance without implying an available video library.
 
-### Photography and known limitations
+## State and privacy
 
-The four category images are locally hosted crops of the hardware artwork supplied by the user for the homepage update. Embedded card captions and buttons are excluded; the page retains its existing live text and navigation. The measurement thumbnail is a locally hosted crop of a licensed photograph showing a wooden window sash being measured with a metric ruler. No AI imagery was generated and no supplier photos are hotlinked or scraped. The hero remains a clearly labeled temporary slot awaiting an approved photograph. The logo remains an SVG/text recreation with a separate subtitle. See [the image provenance record](public/images/README.md) for sources, usage authorization, and processing details.
+`PhotoProvider` remains the root shared React context. It now holds one `File`, the current details draft, and guided answers in memory. There is no localStorage, sessionStorage, cookie, IndexedDB, analytics, or server persistence for intake data. Client-side backward/forward navigation and links within the application retain state. Refreshing, closing the tab, or loading another tab resets photos and answers and displays a recovery message.
 
-Catalog data, photo matching, guided questions, videos, saved favorites, sign-in, partner ordering, and checkout remain unavailable. The reference copy describes the future journey; the homepage explains that matching and partner ordering are coming later.
+Blob URLs are allocated only for decoding/preview and revoked afterward or when previews unmount/change. A canceled or rejected replacement keeps the current photo and answers. Validation uses request generations so stale async decoding cannot overwrite a newer selection. Continuation is blocked while photo decoding is pending.
 
-Physical Android camera behavior and Safari/Firefox still require device/browser verification. Chromium mobile emulation confirms the picker wiring and responsive behavior, not actual camera capture.
+No photograph is sent to a server or external AI service. No matching request is submitted by the review or next-step pages.
+
+## Measurement and integration architecture
+
+- `src/config/part-types.ts`: ten supported hardware families, category mapping, descriptions, orientation applicability, and distinct measurement prompts. These prompts are explicitly **provisional**, not manufacturer specifications or compatibility rules.
+- `src/config/guided.ts`: context-sensitive questionnaire choices and possible category narrowing, with Other/Not Sure and no product records.
+- `src/lib/intake.ts`: positive decimal/fraction validation, unit conversion, and normalization into a typed future `IdentificationIntake` boundary. Inches accept fractions; millimeters accept decimals. Blank and explicitly unknown are distinct. Unit changes convert values and may round; verify against the original measurement.
+- `src/types/catalog.ts`: future product-import, measurement, candidate-match, matching-provider, and affiliate-link contracts only. No provider, fixtures shown as products, supplier API, or checkout adapter is implemented.
+- Existing component boundaries remain: layout, homepage, UI, and part-finder features. New routes reuse existing red/charcoal/white tokens and native accessible controls.
+
+Category-specific part selections and measurement groups keyed by part type remain in memory when selections change. Returning to the previous category/type restores its inputs. Generic notes are available after choosing a type, Other, or Not Sure; unsupported/invalid values cannot masquerade as verified measurements.
+
+## Photography and design
+
+All six existing homepage photographs remain locally hosted. Category artwork was supplied by the user; the guide photo depicts a real window sash being measured, and the hero photo depicts real residential door hardware. See [image provenance](public/images/README.md) for sources, usage authorization, licenses, and deterministic crop/composition details. No new product photography is generated or scraped.
+
+The logo, colors, navigation, photography, and homepage layout are retained. The separate subtitle uses the approved “The Part Finder” tagline. Add Details and Guided Finder follow the supplied mockups' rounded white cards, red selections/actions, bold labels, photo presentation, and numbered progress while adapting to narrow screens.
+
+## Limits and verification records
+
+There is no AI recognition, live catalog, supplier integration, price/stock data, compatibility verification, checkout, authentication, or database. There are no simulated scanning or fabricated result screens. Video guides are not available. State intentionally does not survive refresh.
+
+The existing baseline picker behavior was reproduced successfully in Chromium; physical Android camera capture and Safari/Firefox still need device/browser verification. Deployment/API access limitations are recorded separately from local test results.
+
+- [Audit and implementation record](docs/milestone-2-audit.md)
+- [Final verification report](docs/milestone-2-verification.md)

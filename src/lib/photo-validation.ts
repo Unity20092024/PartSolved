@@ -5,10 +5,12 @@ export function validatePhotoFile(file: File): string | null {
     return "Please choose an image file, such as a JPEG, PNG, or WebP photo.";
   if (file.type === "image/svg+xml")
     return "Please choose a photo rather than an SVG. JPEG, PNG, or WebP works well.";
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type))
+    return "This format is not supported. Please choose a JPEG, PNG, or WebP photo.";
   if (file.size === 0)
     return "This file is empty. Please choose another photo.";
   if (file.size > MAX_PHOTO_BYTES)
-    return "This photo is too large. Please choose an image of 10 MB or less.";
+    return "This photo is too large. Please choose an image of 10 MiB or less.";
   return null;
 }
 

@@ -37,7 +37,7 @@ export function Brand() {
           Part<span>Solved</span>
           <sup>™</sup>
         </span>
-        <span className="brand-subtitle">Window &amp; Door Parts Finder</span>
+        <span className="brand-subtitle">The Part Finder</span>
       </span>
     </Link>
   );

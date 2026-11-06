@@ -25,6 +25,14 @@ Processing: deterministic rectangular crops exclude embedded titles, subtitles, 
 - Processing: deterministic crop `(620, 330, 960, 520)` from the downloaded 1600×1068 image, then WebP quality 90. This centers the actual window sash edge, hand, and ruler. CSS favors the right-hand measurement area on narrow thumbnails. No generated content, reconstructed components, or altered measurement markings.
 - The image demonstrates measuring a real wooden window sash. The guide link and current video-library availability remain unchanged.
 
-## Remaining image slot
+## Residential hardware hero
 
-The hero remains a labeled temporary slot: a wide residential window/door scene with a real handle on the right and space for text on the left. An approved image with confirmed commercial usage rights can be configured in `src/config/photography.ts`. Keep source and rights records here when adding or replacing images.
+- Local asset: `residential-door-hardware-hero.webp`.
+- Source: [Door handle and lock in bedorom](https://www.pexels.com/photo/door-handle-and-lock-in-bedorom-6782276/), photo ID **6782276**.
+- Photographer: **Max Vakhtbovych**. Published 10 February 2021; captured 30 October 2017 with a Nikon D800, according to the source page.
+- Rights: [Pexels License](https://www.pexels.com/license/), permitting commercial website/app use and modifications without required attribution. Used as illustrative hardware photography, without an endorsement claim. Source and license verified on 6 November 2026.
+- Download: `https://images.pexels.com/photos/6782276/pexels-photo-6782276.jpeg?auto=compress&cs=tinysrgb&w=1600` (local hosting only).
+- Processing: crop `(0, 140, 740, 900)` from the 1600×1068 photo, proportionally resize to 650px wide, and place at `(1850, 0)` on a 2500×791 charcoal matte. The leftmost 55px of the photo background are feathered into the matte before the hardware begins, avoiding a hard background seam. This panoramic composition leaves the existing hero copy and upload card positions intact while showing the real handle and lock on the right. WebP quality 88. No hardware was generated, mirrored, reconstructed, or retouched.
+- Responsive display favors the photograph on the right. The existing desktop dark scrim is retained; mobile uses a stronger dark scrim for text contrast. No content dimensions or controls are changed.
+
+All six homepage photographic areas now have local assets. Keep source and rights records here when replacing images.
