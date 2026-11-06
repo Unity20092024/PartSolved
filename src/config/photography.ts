@@ -5,7 +5,7 @@ export const photography: {
 } = {
   hero: null,
   measurement: {
-    src: "/images/hardware-measurement.webp",
-    alt: "Close-up of a screw beside a metric ruler demonstrating thread-pitch measurement",
+    src: "/images/window-sash-measurement.webp",
+    alt: "A wooden window sash being measured with a metric ruler",
   },
 };

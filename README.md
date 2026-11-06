@@ -57,7 +57,7 @@ Files stay in a React context under the shared root layout, surviving client-sid
 
 ### Photography and known limitations
 
-The four category images are locally hosted crops of the hardware artwork supplied by the user for the homepage update. Embedded card captions and buttons are excluded; the page retains its existing live text and navigation. The measurement thumbnail is a locally hosted crop of a public-domain screw-and-ruler photograph. No AI imagery was generated and no supplier photos are hotlinked or scraped. The hero remains a clearly labeled temporary slot awaiting an approved photograph. The logo remains an SVG/text recreation with a separate subtitle. See [the image provenance record](public/images/README.md) for sources, usage authorization, and processing details.
+The four category images are locally hosted crops of the hardware artwork supplied by the user for the homepage update. Embedded card captions and buttons are excluded; the page retains its existing live text and navigation. The measurement thumbnail is a locally hosted crop of a licensed photograph showing a wooden window sash being measured with a metric ruler. No AI imagery was generated and no supplier photos are hotlinked or scraped. The hero remains a clearly labeled temporary slot awaiting an approved photograph. The logo remains an SVG/text recreation with a separate subtitle. See [the image provenance record](public/images/README.md) for sources, usage authorization, and processing details.
 
 Catalog data, photo matching, guided questions, videos, saved favorites, sign-in, partner ordering, and checkout remain unavailable. The reference copy describes the future journey; the homepage explains that matching and partner ordering are coming later.
 

@@ -15,15 +15,15 @@ The user supplied these four local attachments with the explicit instruction to 
 
 Processing: deterministic rectangular crops exclude embedded titles, subtitles, buttons, and card borders, followed by WebP encoding at quality 90. No hardware components were generated, retouched, or reconstructed. The original lockset artwork has keys overlapping its embedded caption, so their lower ends fall outside the usable photograph crop. Product images use `object-fit: contain` inside the existing fixed-height image areas to preserve the visible mechanical components across viewport sizes.
 
-## Hardware measurement thumbnail
+## Window measurement thumbnail
 
-- Local asset: `hardware-measurement.webp`.
-- Source: [M3 screw and 6-32 UTS screw with ruler thread pitch.png](https://commons.wikimedia.org/wiki/File:M3_screw_and_6-32_UTS_screw_with_ruler_thread_pitch.png).
-- Original photographer: **Diluvial**, 6 July 2008. The Commons revision used includes a color adjustment by **Hohum**, 2 February 2024.
-- Rights: **Public domain (PD-self)**. The file page states: “I, the copyright holder of this work, release this work into the public domain. This applies worldwide.” It additionally grants use for any purpose without conditions where that release is not legally possible. The Commons API reports `License: pd`, `Copyrighted: False`, and `AttributionRequired: false`. Verified on 6 November 2026.
-- Download: `https://upload.wikimedia.org/wikipedia/commons/6/6f/M3_screw_and_6-32_UTS_screw_with_ruler_thread_pitch.png` (local copy, no runtime hotlink).
-- Processing: crop `(30, 355, 774, 365)` shows the screw and ruler measurement; WebP quality 90. No generated content or altered measurements.
-- The picture demonstrates measuring small hardware; it is not presented as window-specific instruction or an operational video.
+- Local asset: `window-sash-measurement.webp` (replaces the generic screw-and-ruler thumbnail).
+- Source: [Crop worker measuring window frame with ruler](https://www.pexels.com/photo/crop-worker-measuring-window-frame-with-ruler-5691534/), photo ID **5691534**.
+- Photographer: **Ksenia Chernaya**. Published 25 October 2020; captured 20 October 2020 with a Nikon D750, according to the source page.
+- Rights: [Pexels License](https://www.pexels.com/license/). The license permits free website/app and commercial use and modifications; attribution is not required. The photograph is used as an illustrative measurement example, without endorsement claims or standalone resale. Source and license verified on 6 November 2026.
+- Download: `https://images.pexels.com/photos/5691534/pexels-photo-5691534.jpeg?auto=compress&cs=tinysrgb&w=1600` (downloaded and hosted locally, never hotlinked at runtime).
+- Processing: deterministic crop `(620, 330, 960, 520)` from the downloaded 1600×1068 image, then WebP quality 90. This centers the actual window sash edge, hand, and ruler. CSS favors the right-hand measurement area on narrow thumbnails. No generated content, reconstructed components, or altered measurement markings.
+- The image demonstrates measuring a real wooden window sash. The guide link and current video-library availability remain unchanged.
 
 ## Remaining image slot
 

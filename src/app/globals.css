@@ -664,7 +664,7 @@ button:disabled {
 }
 .guide-thumbnail img {
   object-fit: cover;
-  object-position: left center;
+  object-position: right 70%;
 }
 .guide-thumbnail .photography-slot {
   padding: 8px;
