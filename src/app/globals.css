@@ -249,7 +249,7 @@ button:disabled {
 }
 .hero-photo {
   object-fit: cover;
-  object-position: center;
+  object-position: right center;
 }
 .photography-slot {
   width: 100%;
@@ -1372,5 +1372,11 @@ button:disabled {
 @media (max-width: 374px) {
   .category-caption h3 {
     font-size: 25px;
+  }
+}
+
+@media (max-width: 699px) {
+  .hero-background::after {
+    background: linear-gradient(180deg, #0b0e11e8, #0b0e11b3);
   }
 }
