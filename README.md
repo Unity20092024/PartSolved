@@ -53,11 +53,11 @@ Files stay in a React context under the shared root layout, surviving client-sid
 - `/find-part/guided`, `/guides`, `/support`: clearly labeled initial scaffolds.
 - Search, favorites, and account use accessible native dialog panels. Search accepts input but explicitly states the catalog is not connected.
 
-`src/components/` separates layout, homepage, UI, and part-finder features. `src/config/categories.ts` centralizes category presentation metadata and stable slugs; it contains no inventory or prices. `src/config/photography.ts` holds the future approved hero and measurement photos. Shared brand and layout tokens live in `src/app/globals.css`.
+`src/components/` separates layout, homepage, UI, and part-finder features. `src/config/categories.ts` centralizes category presentation metadata and stable slugs; it contains no inventory or prices. `src/config/photography.ts` holds the hero and measurement image configuration. Shared brand and layout tokens live in `src/app/globals.css`.
 
 ### Photography and known limitations
 
-The approved reference was supplied as a single screenshot, with no separate high-resolution logo or licensed hardware photography. As requested, **all six photographic areas are clearly labeled temporary slots**. No AI-generated hardware, unlicensed supplier images, screenshot crops, or unrelated stock photography is used. The logo is an SVG/text recreation with a separate subtitle. See [the photography checklist](public/images/README.md) for required assets and rights documentation. Approved photos can be configured without redesigning the page.
+The four category images are locally hosted crops of the hardware artwork supplied by the user for the homepage update. Embedded card captions and buttons are excluded; the page retains its existing live text and navigation. The measurement thumbnail is a locally hosted crop of a public-domain screw-and-ruler photograph. No AI imagery was generated and no supplier photos are hotlinked or scraped. The hero remains a clearly labeled temporary slot awaiting an approved photograph. The logo remains an SVG/text recreation with a separate subtitle. See [the image provenance record](public/images/README.md) for sources, usage authorization, and processing details.
 
 Catalog data, photo matching, guided questions, videos, saved favorites, sign-in, partner ordering, and checkout remain unavailable. The reference copy describes the future journey; the homepage explains that matching and partner ordering are coming later.
 

@@ -4,5 +4,8 @@ export const photography: {
   measurement: { src: string; alt: string } | null;
 } = {
   hero: null,
-  measurement: null,
+  measurement: {
+    src: "/images/hardware-measurement.webp",
+    alt: "Close-up of a screw beside a metric ruler demonstrating thread-pitch measurement",
+  },
 };

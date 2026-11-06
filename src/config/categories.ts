@@ -7,7 +7,10 @@ export const categories: readonly Category[] = [
     title: "Window Hardware",
     subtitle: "Locks • Latches • Operators",
     family: "windows",
-    image: null,
+    image: {
+      src: "/images/window-sash-lock.webp",
+      alt: "White window sash lock and keeper with countersunk mounting holes",
+    },
     photoDescription: "Window lock / latch",
   },
   {
@@ -15,7 +18,10 @@ export const categories: readonly Category[] = [
     title: "Door Hardware",
     subtitle: "Handles • Hinges • Locks",
     family: "doors",
-    image: null,
+    image: {
+      src: "/images/residential-door-lockset.webp",
+      alt: "Brushed-metal residential lever lockset with latch and keys",
+    },
     photoDescription: "Door lever handle",
   },
   {
@@ -23,15 +29,21 @@ export const categories: readonly Category[] = [
     title: "Window Parts",
     subtitle: "Rollers • Balances • Sashes",
     family: "windows",
-    image: null,
-    photoDescription: "Window roller assembly",
+    image: {
+      src: "/images/window-balance-assembly.webp",
+      alt: "Two window balance spring assemblies with cream mounting ends and metal hooks",
+    },
+    photoDescription: "Window balance assembly",
   },
   {
     slug: "door-parts",
     title: "Door Parts",
     subtitle: "Hinges • Closers • Thresholds",
     family: "doors",
-    image: null,
-    photoDescription: "Door hinge",
+    image: {
+      src: "/images/sliding-patio-door-roller.webp",
+      alt: "Sliding patio door tandem roller assembly with metal housing and two wheels",
+    },
+    photoDescription: "Sliding patio door roller assembly",
   },
 ];
