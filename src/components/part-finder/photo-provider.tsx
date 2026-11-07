@@ -10,7 +10,10 @@ import {
 } from "react";
 import type { IntakeDraft, GuidedAnswers } from "@/types/intake";
 import { emptyDraft, emptyGuided } from "@/lib/intake";
+import { emptyAssistance, type AssistanceState } from "@/types/assistance";
 interface PhotoState {
+  assistance: AssistanceState;
+  setAssistance: Dispatch<SetStateAction<AssistanceState>>;
   photo: File | null;
   photoBusy: boolean;
   setPhotoBusy: Dispatch<SetStateAction<boolean>>;
@@ -24,6 +27,8 @@ const PhotoContext = createContext<PhotoState | null>(null);
 
 // Intentionally memory-only: survives client navigation, expires on reload/tab close.
 export function PhotoProvider({ children }: { children: ReactNode }) {
+  const [assistance, setAssistance] =
+    useState<AssistanceState>(emptyAssistance);
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoBusy, setPhotoBusy] = useState(false);
   const [draft, setDraft] = useState<IntakeDraft>(emptyDraft);
@@ -31,6 +36,8 @@ export function PhotoProvider({ children }: { children: ReactNode }) {
   return (
     <PhotoContext.Provider
       value={{
+        assistance,
+        setAssistance,
         photo,
         setPhoto,
         photoBusy,

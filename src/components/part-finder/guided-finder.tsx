@@ -9,6 +9,8 @@ import {
   PanelsTopLeft,
   CircleHelp,
 } from "lucide-react";
+import { AssistanceFlow } from "./assistance/assistance-flow";
+import { RecoveryHub } from "./assistance/recovery-hub";
 import { usePhoto } from "./photo-provider";
 import { WorkflowShell } from "./workflow-shell";
 import {
@@ -30,7 +32,7 @@ const questions = [
   "Review your answers",
 ];
 export function GuidedFinder() {
-  const { guided, setGuided, setDraft } = usePhoto();
+  const { guided, setGuided, setDraft, assistance, setAssistance } = usePhoto();
   const router = useRouter();
   const [error, setError] = useState("");
   const heading = useRef<HTMLHeadingElement>(null);
@@ -66,12 +68,32 @@ export function GuidedFinder() {
     prior && !candidates.some((type) => type.id === prior.id)
       ? [...candidates, prior]
       : candidates;
+  if (assistance.view !== "questions") return <AssistanceFlow />;
   return (
     <WorkflowShell
       title="Guided Finder"
       description="Not sure what your part is called? Answer a few quick questions to narrow down a possible category."
       back="/"
     >
+      <button
+        type="button"
+        className="measurement-help text-button"
+        onClick={() =>
+          setAssistance((previous) => ({
+            ...previous,
+            view: "hub",
+            location: previous.location || guided.location,
+          }))
+        }
+      >
+        Need a simpler way? Get help without knowing the part
+      </button>
+      {guided.step === 0 && (
+        <p className="field-hint">
+          Returning after a refresh? Photos and answers are held only in this
+          tab’s memory and must be added again after a refresh.
+        </p>
+      )}
       <ol className="guided-progress" aria-label="Guided Finder progress">
         {questions.map((question, index) => (
           <li
@@ -313,21 +335,59 @@ export function GuidedFinder() {
                 </div>
               ))}
             </dl>
-            <div className="info-notice">
-              <h3>Possible category: {categoryLabel(suggestion.category)}</h3>
-              <p>
-                {suggestion.uncertain
-                  ? "More information is needed to narrow this down. Continue with Not Sure, or use measurement help."
-                  : "Your answers suggest this hardware family for further investigation."}{" "}
-                This is a category suggestion, not a verified product match or
-                compatibility assessment.
-              </p>
-            </div>
+            {suggestion.uncertain && <RecoveryHub />}
+            {suggestion.category !== "not-sure" && (
+              <div className="info-notice">
+                <h3>Possible category: {categoryLabel(suggestion.category)}</h3>
+                <p>
+                  {suggestion.uncertain
+                    ? "More information is needed to narrow this down. Continue with Not Sure, or use measurement help."
+                    : "Your answers suggest this hardware family for further investigation."}{" "}
+                  This is a category suggestion, not a verified product match or
+                  compatibility assessment.
+                </p>
+              </div>
+            )}
             <Link className="measurement-help" href="/guides/measurements">
               View measurement and identification guidance
             </Link>
           </>
         )}
+        {guided.step < 4 &&
+          [
+            guided.location,
+            guided.purpose,
+            guided.appearance,
+            guided.information,
+          ][guided.step] &&
+          ["not-sure", "other"].includes(
+            [
+              guided.location,
+              guided.purpose,
+              guided.appearance,
+              guided.information,
+            ][guided.step],
+          ) && (
+            <div className="info-notice">
+              <p>
+                You don’t need to know this answer. Try pictures or describe the
+                problem instead.
+              </p>
+              <button
+                type="button"
+                className="measurement-help text-button"
+                onClick={() =>
+                  setAssistance((previous) => ({
+                    ...previous,
+                    view: "hub",
+                    location: previous.location || guided.location,
+                  }))
+                }
+              >
+                Try pictures and symptoms instead
+              </button>
+            </div>
+          )}
         {error && (
           <p className="field-error" role="alert">
             {error}

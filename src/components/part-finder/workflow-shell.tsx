@@ -8,6 +8,7 @@ export function WorkflowShell({
   completedSteps,
   optionalPhoto = false,
   back,
+  onBack,
   children,
 }: {
   title: string;
@@ -16,6 +17,7 @@ export function WorkflowShell({
   completedSteps?: number[];
   optionalPhoto?: boolean;
   back: string;
+  onBack?: () => void;
   children: ReactNode;
 }) {
   const steps = [
@@ -26,10 +28,21 @@ export function WorkflowShell({
   return (
     <main id="main-content" className="workflow-page">
       <div className="workflow-top">
-        <Link href={back} className="back-link">
-          <ArrowLeft size={20} aria-hidden="true" />
-          Back
-        </Link>
+        {onBack ? (
+          <button
+            type="button"
+            className="back-link text-button"
+            onClick={onBack}
+          >
+            <ArrowLeft size={20} aria-hidden="true" />
+            Back
+          </button>
+        ) : (
+          <Link href={back} className="back-link">
+            <ArrowLeft size={20} aria-hidden="true" />
+            Back
+          </Link>
+        )}
         {step !== undefined && (
           <nav aria-label="Identification progress">
             <ol className="workflow-progress">
