@@ -5,6 +5,7 @@ export interface LocalVideoThumbnail {
   alt: string;
   width: number;
   height: number;
+  caption?: string;
 }
 export type VideoSource =
   | { type: "youtube"; videoId: string }
@@ -16,6 +17,7 @@ export type VideoSource =
 export interface VideoGuide {
   id: string;
   title: string;
+  description?: string;
   source: VideoSource;
   thumbnail: LocalVideoThumbnail;
   categories: readonly Exclude<HardwareCategory, "not-sure">[];

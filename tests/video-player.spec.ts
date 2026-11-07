@@ -4,7 +4,10 @@ import path from "node:path";
 import { buildVideoHarness } from "./helpers/build-video-harness.mjs";
 import { resolveVideoSource } from "../src/lib/video-source";
 import type { HybridVideoPlayerProps } from "../src/types/video";
-const output = path.resolve("test-results", `video-player-harness-${process.pid}`);
+const output = path.resolve(
+  "test-results",
+  `video-player-harness-${process.pid}`,
+);
 const thumbnail = {
   src: "/images/window-sash-measurement.webp",
   alt: "Development test thumbnail",
@@ -199,7 +202,7 @@ test("blocked media keeps a fallback and replacing the source returns to a thumb
   }
 });
 
-test("public Guides keeps written help and publishes no development tutorials or initial embeds", async ({
+test("public Guides publishes the two reviewed candidates without initial provider requests", async ({
   page,
 }) => {
   const youtubeRequests: string[] = [];
@@ -220,18 +223,49 @@ test("public Guides keeps written help and publishes no development tutorials or
   await expect(
     page.getByRole("heading", { name: "Video guides", exact: true }),
   ).toBeVisible();
+  const cards = page.locator(".video-guide-card");
+  await expect(cards).toHaveCount(2);
   await expect(
-    page.getByText(/No video tutorials are published yet/),
+    page.getByRole("heading", {
+      name: "How to Identify Window Balances | Spiral, Channel, Block & Tackle & Coil Balances",
+      exact: true,
+    }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "Every Type of Hinge Explained in 13 Minutes",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: /Equiparts/ })).toHaveAttribute(
+    "href",
+    "https://www.youtube.com/@EquipartsNetSloan",
+  );
+  await expect(
+    page.getByRole("link", { name: /Workshop Unpacked/ }),
+  ).toHaveAttribute("href", "https://www.youtube.com/@WorkshopUnpacked");
+  await expect(
+    page.getByText("Hardware illustration, not a frame from the video.", {
+      exact: true,
+    }),
+  ).toHaveCount(2);
+  for (const image of await cards.locator("img").all()) {
+    await expect(image).toHaveAttribute("loading", "lazy");
+    await expect(image).toHaveAttribute(
+      "src",
+      /%2Fimages%2Fvideo-thumbnails%2F/,
+    );
+  }
+  await expect(page.getByText(/development fixture/i)).toHaveCount(0);
   await expect(page.locator("iframe, video")).toHaveCount(0);
   expect(youtubeRequests).toEqual([]);
   await page
     .getByRole("link", {
-      name: "View measurement and identification help",
+      name: "Measuring window balances",
       exact: true,
     })
     .click();
-  await expect(page).toHaveURL("/guides/measurements");
+  await expect(page).toHaveURL("/guides/measurements#window-balances");
   await expect(
     page.getByRole("heading", {
       name: "Measuring screw-hole spacing",

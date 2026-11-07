@@ -4,7 +4,7 @@
 
 The existing `/guides` route now renders `VideoGuideLibrary` after its original written links and identification-photo instructions. `/guides/measurements` and its measurement instructions are unchanged. No new application route, video upload endpoint, storage integration, database or authentication was added.
 
-There are currently **no approved tutorial sources in the repository**, so `src/config/video-guides.ts` is deliberately empty. The page says no video tutorials are published and links to written guidance. Development fixtures are not entries in this catalog and are never served as public tutorials. Add actual approved content to the configuration when available; no player implementation change is needed.
+The user subsequently supplied a video research tracker. The catalog now includes its two EXACT MATCH candidates with official YouTube oEmbed metadata, creator credits and explicit scope descriptions. See `video-source-review.md` for the evidence, network limitations and unpublished candidates. Actual live playback remains unverified in this environment; neither overview is presented as a complete measurement or compatibility assessment. Local thumbnails are labeled hardware illustrations rather than video frames. Partial/title-only candidates and development fixtures are not published. No MP4 tutorial was supplied; native MP4 support remains tested using a private fixture.
 
 ## Components and configuration
 
@@ -12,7 +12,7 @@ There are currently **no approved tutorial sources in the repository**, so `src/
 - `src/components/guides/video-guide-library.tsx`: server-rendered catalog wrapper with titles, hardware categories, creator attribution and related written-guide links.
 - `src/components/guides/video-guides.css`: scoped responsive 16:9 media frames and existing PartSolved colors, rounded corners and accessible tap targets.
 - `src/types/video.ts`: discriminated YouTube/MP4 source union, local thumbnail dimensions/alt text, hardware categories, creator name/optional HTTPS credit URL and related guide titles/paths. MP4 can include a local WebVTT captions track.
-- `src/config/video-guides.ts`: the only production tutorial catalog. No development fixture or unreviewed tutorial is included.
+- `src/config/video-guides.ts`: the production catalog of the two tracker-exact overview candidates. No development fixture or partial/title-only candidate is included.
 - `src/lib/video-source.ts`: constructs official privacy-enhanced embed URLs and validates the 11-character YouTube ID. MP4 paths must be same-origin MP4 files; protocol-relative/remote sources are rejected.
 
 To publish a guide, supply an approved video ID or actual same-origin MP4 path, a permitted optimized image under `public/images/`, its actual dimensions and descriptive alt text, a title, appropriate hardware-category slugs, creator credits and existing related written-guide links. Place approved self-hosted MP4 files at the configured same-origin path; this release does not add external storage or upload infrastructure. Provide accurate captions for spoken self-hosted content when available. YouTube captions use the provider's native controls. Do not copy or proxy YouTube video media.
@@ -43,7 +43,7 @@ A Watch on YouTube or Open MP4 directly link is always available for valid sourc
 
 Coverage includes URL validation, zero initial embeds/provider requests, lazy local thumbnails, keyboard activation, no autoplay, preload-none behavior, actual native MP4 playback, media failure/fallbacks, close/unmount cleanup, source replacement, 16:9 dimensions and overflow at 320/375/390/430/768/1280px, and preservation of public written Guides content and measurement navigation.
 
-Final checks: lint (no warnings/errors), TypeScript validation and the production build passed. The full Chromium regression suite completed with **56 passed, 2 skipped** in 3.2 minutes. The existing skips are duplicate mobile-project viewport loops covered by the desktop project. All ten new player cases passed across desktop and mobile Chromium, including actual native MP4 playback and intercepted YouTube activation checks.
+Final checks: lint (no warnings/errors), TypeScript validation and the production build passed. The full Chromium regression suite completed with **56 passed, 2 skipped** in 3.4 minutes. The existing skips are duplicate mobile-project viewport loops covered by the desktop project. All ten new player cases passed across desktop and mobile Chromium, including actual native MP4 playback and intercepted YouTube activation checks.
 
 Commands:
 
@@ -54,4 +54,4 @@ npm run build
 PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm run test:e2e -- --workers=1
 ```
 
-The browser environment uses installed Chromium; other environments can use their Playwright browser installation. The test harness is development-only. No actual approved YouTube playback, physical mobile device, Safari or Firefox verification is claimed. Existing written content remains usable without any video configuration.
+The browser environment uses installed Chromium; other environments can use their Playwright browser installation. The test harness is development-only. No live YouTube playback, physical mobile device, Safari or Firefox verification is claimed. Existing written content remains usable independently of video playback.

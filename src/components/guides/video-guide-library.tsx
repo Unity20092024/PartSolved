@@ -40,11 +40,15 @@ export function VideoGuideLibrary({
                   .filter(Boolean)
                   .join(" · ")}
               </p>
+              {guide.description && <p>{guide.description}</p>}
               <HybridVideoPlayer
                 title={guide.title}
                 source={guide.source}
                 thumbnail={guide.thumbnail}
               />
+              {guide.thumbnail.caption && (
+                <p className="hybrid-video-help">{guide.thumbnail.caption}</p>
+              )}
               <p>
                 Video by{" "}
                 {guide.creator.url ? (
