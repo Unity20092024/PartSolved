@@ -35,3 +35,5 @@ The supplied tracker is retained verbatim as research history. Its statement tha
 ## Quality checks
 
 Lint, TypeScript and production build passed. The updated full Chromium suite completed with **56 passed, 2 existing duplicate viewport tests skipped** in 3.4 minutes. The public Guides checks confirm both source titles, creator URLs, local lazy thumbnails, illustration labels, written-guide navigation and zero initial YouTube/ytimg/googlevideo requests on desktop and mobile. Existing native MP4 playback, click-gated embeds, fallbacks, source replacement, cleanup and finder/homepage regressions remain passing.
+
+Final visual checks at 320/375/390/430/768/1280px found two cards, zero initial iframes/provider requests, no overflow and no page errors. A platform-dependent emoji play glyph was replaced with a lightweight CSS triangle; the final lint, TypeScript and production build passed, followed by **10/10 targeted player tests**. Desktop and mobile screenshots are stored locally under ignored `artifacts/video-catalog/`.

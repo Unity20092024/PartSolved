@@ -60,7 +60,7 @@ function VideoPlayer({ title, source, thumbnail }: HybridVideoPlayerProps) {
                 aria-label={`Play ${title}`}
                 onClick={() => setActive(true)}
               >
-                <span aria-hidden="true">▶</span>
+                <span aria-hidden="true" />
                 <span>Play video</span>
               </button>
             )}
