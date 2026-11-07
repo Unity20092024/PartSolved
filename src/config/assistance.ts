@@ -87,7 +87,7 @@ export const families: PartFamily[] = [
     check:
       "Keep the window safely supported. Look for a spring or metal channel at the side; record markings and end fittings without removing a loaded spring.",
     guide: "window-balances",
-    image: "/images/window-balance-assembly.webp",
+    image: "/images/part-families/window-balances.webp",
   },
   {
     id: "window-locks",
@@ -99,7 +99,7 @@ export const families: PartFamily[] = [
     check:
       "Check whether the lock and keeper line up. Photograph both pieces and measure screw-hole centers.",
     guide: "screw-spacing",
-    image: "/images/window-sash-lock.webp",
+    image: "/images/part-families/window-sash-lock.webp",
   },
   {
     id: "operators",
@@ -112,6 +112,7 @@ export const families: PartFamily[] = [
     check:
       "Check whether your window swings outward. Photograph the handle, base and arm; note orientation without forcing the mechanism.",
     guide: "orientation",
+    image: "/images/part-families/casement-crank-operator.webp",
   },
   {
     id: "rollers",
@@ -123,7 +124,7 @@ export const families: PartFamily[] = [
     check:
       "Inspect the track for debris first. If the roller is safely accessible, record wheel diameter and housing dimensions. Do not lift a heavy door alone.",
     guide: "roller-housing",
-    image: "/images/sliding-patio-door-roller.webp",
+    image: "/images/part-families/patio-door-rollers.webp",
   },
   {
     id: "patio-locks",
@@ -135,6 +136,7 @@ export const families: PartFamily[] = [
     check:
       "Look at the door edge and keeper alignment. Photograph the faceplate and note the screw spacing and backset.",
     guide: "lock-backset",
+    image: "/images/part-families/patio-door-mortise-lock.webp",
   },
   {
     id: "handles",
@@ -146,7 +148,7 @@ export const families: PartFamily[] = [
     check:
       "Photograph both sides and the door edge. Note whether the door slides or swings and measure mounting-hole spacing.",
     guide: "screw-spacing",
-    image: "/images/residential-door-lockset.webp",
+    image: "/images/part-families/patio-door-handle-set.webp",
   },
   {
     id: "closers",
@@ -158,6 +160,7 @@ export const families: PartFamily[] = [
     check:
       "Look for the cylinder attached between the door and frame. Photograph the brackets and record overall dimensions without disconnecting it.",
     guide: "overall-size",
+    image: "/images/part-families/storm-door-closer.webp",
   },
   {
     id: "hinges",
@@ -169,6 +172,7 @@ export const families: PartFamily[] = [
     check:
       "Check for loose fasteners without removing the door. Note hinge shape, overall size and hole locations.",
     guide: "overall-size",
+    image: "/images/part-families/door-hinges.webp",
   },
   {
     id: "screen-latches",
@@ -180,6 +184,21 @@ export const families: PartFamily[] = [
     check:
       "Photograph inside and outside handles and the keeper. Measure screw-hole spacing and note door thickness.",
     guide: "screw-spacing",
+    image: "/images/part-families/screen-door-push-button-latch.webp",
+  },
+  {
+    id: "track-fin-locks",
+    name: "Sliding window track/fin locks",
+    category: "window-hardware",
+    partType: "track-fin-lock",
+    description:
+      "A small lock or stop that helps secure a sliding window along its track or fin.",
+    problem:
+      "A sliding window that will not stay secured or a broken track lock.",
+    check:
+      "Photograph the lock and the track or fin where it attaches. Record its dimensions and mounting method without forcing the part.",
+    guide: "overall-size",
+    image: "/images/part-families/sliding-window-fin-lock.webp",
   },
 ];
 export const familyById = (id: string) =>

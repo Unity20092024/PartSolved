@@ -1,81 +1,17 @@
 import Image from "next/image";
 import type { PartFamily } from "@/types/assistance";
 
-// Original schematic illustrations: family shapes, never exact product drawings.
+// Shared by the existing visual gallery and assisted results.
 export function FamilyImage({ family }: { family: PartFamily }) {
-  if (family.image)
-    return (
-      <Image
-        src={family.image}
-        alt={`Example of ${family.name.toLowerCase()}, not an exact replacement`}
-        width={560}
-        height={260}
-        sizes="(max-width: 600px) 100vw, 430px"
-        className="assist-family-image"
-      />
-    );
   return (
-    <svg
+    <Image
+      src={family.image}
+      alt={`Example of ${family.name.toLowerCase()}, not an exact replacement`}
+      width={1100}
+      height={733}
+      sizes="(max-width: 600px) calc(100vw - 70px), (max-width: 960px) 50vw, 430px"
       className="assist-family-image"
-      viewBox="0 0 360 180"
-      role="img"
-      aria-label={`${family.name} schematic illustration, not to scale`}
-    >
-      <rect width="360" height="180" fill="#f7f7f7" />
-      <g fill="#dedfdf" stroke="#34383b" strokeWidth="4" strokeLinejoin="round">
-        {family.id === "operators" && (
-          <>
-            <rect x="75" y="112" width="140" height="35" rx="12" />
-            <path d="M145 112 265 47 276 62 164 130Z" />
-            <circle cx="153" cy="126" r="13" />
-            <path d="M106 111V83h36" fill="none" />
-            <circle cx="148" cy="83" r="9" />
-          </>
-        )}
-        {family.id === "patio-locks" && (
-          <>
-            <rect x="113" y="29" width="112" height="127" rx="5" />
-            <rect x="101" y="19" width="16" height="146" rx="3" />
-            <path d="M116 81h-22v28h22" />
-            <circle cx="166" cy="91" r="13" />
-            <circle cx="109" cy="38" r="3" />
-            <circle cx="109" cy="145" r="3" />
-          </>
-        )}
-        {family.id === "closers" && (
-          <>
-            <rect x="69" y="71" width="145" height="37" rx="15" />
-            <path d="M214 89h72" />
-            <path d="M52 65v48h17M287 67v45" fill="none" />
-            <circle cx="287" cy="89" r="6" />
-          </>
-        )}
-        {family.id === "hinges" && (
-          <>
-            <rect x="86" y="35" width="88" height="115" rx="4" />
-            <rect x="186" y="35" width="88" height="115" rx="4" />
-            <rect x="173" y="29" width="15" height="126" rx="6" />
-            {[58, 93, 128].map((y) => (
-              <g key={y}>
-                <circle cx="120" cy={y} r="6" />
-                <circle cx="240" cy={y} r="6" />
-              </g>
-            ))}
-          </>
-        )}
-        {family.id === "screen-latches" && (
-          <>
-            <rect x="112" y="27" width="60" height="130" rx="12" />
-            <circle cx="142" cy="56" r="15" />
-            <path d="M145 88h116v20H145Z" />
-            <circle cx="142" cy="142" r="4" />
-          </>
-        )}
-      </g>
-      <text x="180" y="175" textAnchor="middle" fontSize="12" fill="#4b5054">
-        Family illustration · not to scale
-      </text>
-    </svg>
+    />
   );
 }
 export function LocationDiagram({
