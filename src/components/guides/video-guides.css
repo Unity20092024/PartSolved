@@ -1,0 +1,118 @@
+.video-guide-library {
+  margin-top: 32px;
+}
+.video-guide-library > h2 {
+  margin-bottom: 18px;
+}
+.video-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.video-guide-card {
+  min-width: 0;
+  margin: 0;
+}
+.video-guide-card h3 {
+  font-size: 23px;
+  line-height: 1.25;
+}
+.video-guide-categories {
+  color: #555e68;
+  font-size: 14px;
+}
+.hybrid-video-player {
+  margin: 18px 0;
+  min-width: 0;
+}
+.hybrid-video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #171b1f;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.hybrid-video-frame > iframe,
+.hybrid-video-frame > video,
+.hybrid-video-thumbnail {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.hybrid-video-thumbnail {
+  object-fit: cover;
+}
+.hybrid-video-play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 9px;
+  cursor: pointer;
+  border: 0;
+  background: linear-gradient(transparent, #0009);
+  color: white;
+  font: inherit;
+  font-weight: 750;
+}
+.hybrid-video-play > span:first-child {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 52px;
+  border-radius: 15px;
+  background: linear-gradient(#ec1017, #b90008);
+  box-shadow: 0 2px 12px #0005;
+  font-size: 25px;
+}
+.hybrid-video-play:focus-visible {
+  outline: 4px solid #e0000b;
+  outline-offset: -5px;
+}
+.hybrid-video-help {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #505861;
+  margin: 12px 0;
+}
+.hybrid-video-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.hybrid-video-actions a,
+.hybrid-video-actions button,
+.video-guide-card li a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #a90008;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font: inherit;
+}
+.hybrid-video-actions button {
+  padding: 8px 12px;
+  border: 1px solid #bbb;
+  border-radius: 9px;
+  background: white;
+  cursor: pointer;
+}
+.hybrid-video-frame > video:focus-visible,
+.hybrid-video-frame > iframe:focus-visible {
+  outline: 3px solid white;
+  outline-offset: -4px;
+}
+.video-guide-card ul {
+  padding-left: 20px;
+}
+@media (max-width: 700px) {
+  .video-guide-grid {
+    grid-template-columns: 1fr;
+  }
+}

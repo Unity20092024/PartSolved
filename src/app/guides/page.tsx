@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ScaffoldPage } from "@/components/ui/scaffold-page";
+import { VideoGuideLibrary } from "@/components/guides/video-guide-library";
+import { videoGuides } from "@/config/video-guides";
 export const metadata = { title: "Identification Guides" };
 export default function GuidesPage() {
   return (
@@ -41,13 +43,14 @@ export default function GuidesPage() {
           </li>
         </ul>
         <p>
-          You can select one local photo at a time. Video guides and automated
-          matching are not connected.
+          You can select one local photo at a time. Automated matching is not
+          connected.
         </p>
         <Link className="button button-primary" href="/#photo-upload">
           Take or upload a photo
         </Link>
       </section>
+      <VideoGuideLibrary videos={videoGuides} />
     </ScaffoldPage>
   );
 }
