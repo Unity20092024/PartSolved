@@ -37,7 +37,7 @@ export interface PartFamily {
   problem: string;
   check: string;
   guide: MeasurementGuide;
-  image?: string;
+  image: string;
 }
 export interface FamilySuggestion {
   family: PartFamily;
