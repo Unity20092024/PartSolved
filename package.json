@@ -8,7 +8,10 @@
     "start": "next start --hostname 0.0.0.0",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:ai": "node tests/helpers/build-ai-tests.mjs && node --test test-results/ai/server-tests.cjs",
+    "eval:ai": "node scripts/evaluate-photo-assist.mjs",
+    "test:ai:reviewer": "node tests/helpers/reviewer-smoke.mjs"
   },
   "engines": {
     "node": ">=22.0.0"
@@ -17,16 +20,19 @@
     "lucide-react": "1.69.0",
     "next": "16.4.5",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.1",
     "@tailwindcss/postcss": "4.3.4",
     "@types/node": "^24",
+    "@types/pg": "8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9.39.5",
     "eslint-config-next": "16.4.5",
+    "pg": "8.23.1",
     "tailwindcss": "4.3.4",
     "typescript": "^5.9.3"
   }

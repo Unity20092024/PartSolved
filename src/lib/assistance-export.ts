@@ -45,7 +45,7 @@ export function assistanceSummary(
         .join(", ") || "None"
     }`,
     "",
-    "Photos (not analyzed):",
+    "Photos (supporting information, not verified identification):",
     ...(primary ? [`Primary photo: ${primary.name}`] : ["No primary photo"]),
     ...state.photos.map(
       (photo, index) =>

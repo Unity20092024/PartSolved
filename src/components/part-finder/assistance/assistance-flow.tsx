@@ -31,6 +31,10 @@ import {
 } from "@/types/assistance";
 import type { PartFamily } from "@/types/assistance";
 import "./assistance.css";
+import dynamic from "next/dynamic";
+const PhotoAssist = dynamic(() =>
+  import("../ai/photo-assist").then((module) => module.PhotoAssist),
+);
 
 const titles: Record<Exclude<AssistanceView, "questions">, string> = {
   hub: "A simpler way to find your part",
@@ -43,7 +47,11 @@ const titles: Record<Exclude<AssistanceView, "questions">, string> = {
   results: "Here's What Might Be Causing the Problem",
   summary: "Your local identification summary",
 };
-export function AssistanceFlow() {
+export function AssistanceFlow({
+  photoAssistAvailable = false,
+}: {
+  photoAssistAvailable?: boolean;
+}) {
   const {
     assistance: state,
     setAssistance,
@@ -146,10 +154,12 @@ export function AssistanceFlow() {
   return (
     <WorkflowShell
       title="Guided Finder Assistance"
+      photoAssistAvailable={photoAssistAvailable}
       description="No part name or measurements needed. Your previous answers are still here."
       back="/find-part/guided"
       onBack={() => go(view === "hub" ? "questions" : back)}
     >
+      {photoAssistAvailable && <PhotoAssist />}
       <nav className="assist-navigation" aria-label="Assistance methods">
         <button type="button" onClick={() => go("hub")}>
           Help options
@@ -419,8 +429,9 @@ export function AssistanceFlow() {
           {view === "summary" && (
             <>
               <p>
-                Nothing has been submitted. Keep a copy for your own reference.
-                Photos and answers disappear if you refresh or close this tab.
+                No request for human identification help has been submitted.
+                Keep a copy for your own reference. Photos and answers disappear
+                if you refresh or close this tab.
               </p>
               <label>
                 Identification notes

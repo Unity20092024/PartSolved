@@ -219,7 +219,7 @@ export function AssistancePhotos() {
           ].slice(0, 4),
         }));
         setStatus(
-          `${selected.length} supporting photo${selected.length === 1 ? "" : "s"} added. No image recognition was performed.`,
+          `${selected.length} supporting photo${selected.length === 1 ? "" : "s"} added. Adding photos does not analyze them.`,
         );
       }
     } catch (failure) {

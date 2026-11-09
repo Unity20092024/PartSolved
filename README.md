@@ -88,9 +88,17 @@ The logo, colors, navigation, photography, and homepage layout are retained. The
 
 ## Limits and verification records
 
-There is no AI recognition, live catalog, supplier integration, price/stock data, compatibility verification, checkout, authentication, or database. There are no simulated scanning or fabricated result screens. Video guides are not available. State intentionally does not survive refresh.
+The public release has no AI recognition, live catalog, supplier integration, price/stock data, compatibility verification, checkout, authentication, or database connection. There are no simulated scanning or fabricated result screens. State intentionally does not survive refresh. The private AI Photo Assist foundation below does not enable public recognition.
 
 The existing baseline picker behavior was reproduced successfully in Chromium; physical Android camera capture and Safari/Firefox still need device/browser verification. Deployment/API access limitations are recorded separately from local test results.
 
 - [Audit and implementation record](docs/milestone-2-audit.md)
 - [Final verification report](docs/milestone-2-verification.md)
+
+## Private AI Photo Assist — Stage 1
+
+The feature branch adds optional, consent-based hardware-family assistance to the existing Guided Finder and photo preview. It is disabled by default and blocked in Vercel production. It needs an OpenAI credential and the **same Supabase database as the blog** before live private review; no hosted database or migration has been provisioned/applied by this implementation.
+
+Server-side image validation, pinned-model structured responses, customer confirmation, local state preservation and atomic $1/day / $10/month accounting are implemented. The reserved maximum is $0.03/call; uncertain calls stay reserved across UTC period boundaries. This is not exact replacement matching and has no Strybuc catalog connection.
+
+See [setup, privacy, pricing and release gates](docs/ai-photo-assist/README.md), [verification](docs/ai-photo-assist/verification.md), and [.env.example](.env.example). Additional checks are `npm run test:ai`, `npm run test:ai:reviewer` (dedicated local test database required), and `npm run eval:ai` (manifest validation only; no API calls by default).

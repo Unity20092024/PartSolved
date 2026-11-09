@@ -14,7 +14,7 @@ import { categoryLabel, getPartType, partTypeLabel } from "@/config/part-types";
 import { AssistanceNotes } from "./assistance/assistance-notes";
 import { guidedLabel } from "@/config/guided";
 export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
-  const { photo, draft, guided } = usePhoto();
+  const { photo, draft, guided, photoAssist } = usePhoto();
   const errors = validateDraft(draft),
     type = selectedType(draft),
     definition = getPartType(type);
@@ -108,9 +108,9 @@ export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
           <div className="info-notice" role="status">
             <h2>Automated product matching is not connected yet</h2>
             <p>
-              Your information is kept locally for this workflow. No photo has
-              been submitted, no products have been identified, and
-              compatibility has not been verified.
+              {photoAssist.requested
+                ? "Your written answers remain local. AI Photo Assist is separate from catalog matching. No products have been identified, and compatibility has not been verified."
+                : "Your information is kept locally for this workflow. No photo has been submitted, no products have been identified, and compatibility has not been verified."}
             </p>
           </div>
           {nextSteps ? (
