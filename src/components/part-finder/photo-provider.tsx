@@ -11,7 +11,13 @@ import {
 import type { IntakeDraft, GuidedAnswers } from "@/types/intake";
 import { emptyDraft, emptyGuided } from "@/lib/intake";
 import { emptyAssistance, type AssistanceState } from "@/types/assistance";
+import {
+  emptyPhotoAssist,
+  type PhotoAssistState,
+} from "@/types/ai-photo-assist";
 interface PhotoState {
+  photoAssist: PhotoAssistState;
+  setPhotoAssist: Dispatch<SetStateAction<PhotoAssistState>>;
   assistance: AssistanceState;
   setAssistance: Dispatch<SetStateAction<AssistanceState>>;
   photo: File | null;
@@ -29,13 +35,27 @@ const PhotoContext = createContext<PhotoState | null>(null);
 export function PhotoProvider({ children }: { children: ReactNode }) {
   const [assistance, setAssistance] =
     useState<AssistanceState>(emptyAssistance);
-  const [photo, setPhoto] = useState<File | null>(null);
+  const [photo, setPhotoState] = useState<File | null>(null);
+  const [photoAssist, setPhotoAssist] =
+    useState<PhotoAssistState>(emptyPhotoAssist);
+  function setPhoto(file: File | null) {
+    setPhotoState(file);
+    setPhotoAssist((old) => ({
+      ...old,
+      revision: old.revision + 1,
+      selected: old.selected.filter((item) => item !== photo),
+      analyzed: [],
+      result: null,
+    }));
+  }
   const [photoBusy, setPhotoBusy] = useState(false);
   const [draft, setDraft] = useState<IntakeDraft>(emptyDraft);
   const [guided, setGuided] = useState<GuidedAnswers>(emptyGuided);
   return (
     <PhotoContext.Provider
       value={{
+        photoAssist,
+        setPhotoAssist,
         assistance,
         setAssistance,
         photo,

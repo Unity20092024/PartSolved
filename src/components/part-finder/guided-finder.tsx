@@ -31,7 +31,15 @@ const questions = [
   "Do you have measurements or markings?",
   "Review your answers",
 ];
-export function GuidedFinder() {
+import dynamic from "next/dynamic";
+const PhotoAssist = dynamic(() =>
+  import("./ai/photo-assist").then((module) => module.PhotoAssist),
+);
+export function GuidedFinder({
+  photoAssistAvailable = false,
+}: {
+  photoAssistAvailable?: boolean;
+}) {
   const { guided, setGuided, setDraft, assistance, setAssistance } = usePhoto();
   const router = useRouter();
   const [error, setError] = useState("");
@@ -68,13 +76,16 @@ export function GuidedFinder() {
     prior && !candidates.some((type) => type.id === prior.id)
       ? [...candidates, prior]
       : candidates;
-  if (assistance.view !== "questions") return <AssistanceFlow />;
+  if (assistance.view !== "questions")
+    return <AssistanceFlow photoAssistAvailable={photoAssistAvailable} />;
   return (
     <WorkflowShell
       title="Guided Finder"
+      photoAssistAvailable={photoAssistAvailable}
       description="Not sure what your part is called? Answer a few quick questions to narrow down a possible category."
       back="/"
     >
+      {photoAssistAvailable && <PhotoAssist />}
       <button
         type="button"
         className="measurement-help text-button"

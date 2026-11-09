@@ -1,4 +1,6 @@
+"use client";
 import Link from "next/link";
+import { usePhoto } from "./photo-provider";
 import { ArrowLeft, Check } from "lucide-react";
 import type { ReactNode } from "react";
 export function WorkflowShell({
@@ -7,6 +9,7 @@ export function WorkflowShell({
   step,
   completedSteps,
   optionalPhoto = false,
+  photoAssistAvailable = false,
   back,
   onBack,
   children,
@@ -16,10 +19,12 @@ export function WorkflowShell({
   step?: number;
   completedSteps?: number[];
   optionalPhoto?: boolean;
+  photoAssistAvailable?: boolean;
   back: string;
   onBack?: () => void;
   children: ReactNode;
 }) {
+  const { photoAssist } = usePhoto();
   const steps = [
     { label: "Photo", href: "/find-part/preview" },
     { label: "Details", href: "/find-part/details" },
@@ -91,9 +96,9 @@ export function WorkflowShell({
       <p className="workflow-description">{description}</p>
       {children}
       <p className="workflow-privacy">
-        Your photo and answers stay in this tab’s memory. Refreshing or closing
-        the tab clears this workflow. Nothing is uploaded or submitted for
-        matching.
+        {photoAssistAvailable || photoAssist.requested
+          ? "Your originals and written answers stay in this tab’s memory and clear on refresh. Analyze Photo sends only selected photos to OpenAI after your agreement. PartSolved does not permanently save them. Automated product matching is not connected."
+          : "Your photo and answers stay in this tab’s memory. Refreshing or closing the tab clears this workflow. Nothing is uploaded or submitted for matching."}
       </p>
     </main>
   );

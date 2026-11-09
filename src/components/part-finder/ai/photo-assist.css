@@ -1,0 +1,70 @@
+.photo-assist {
+  margin-block: 24px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.photo-assist h2 span {
+  display: block;
+  margin-top: 8px;
+}
+.ai-photo-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 16px;
+}
+.ai-photo-option {
+  min-width: 0;
+  border: 1px solid #d8dadd;
+  border-radius: 16px;
+  padding: 12px;
+}
+.ai-photo-option .photo-preview {
+  margin: 0;
+}
+.ai-photo-option .photo-preview img {
+  width: 100%;
+  height: 160px;
+  object-fit: contain;
+  background: white;
+}
+.photo-assist label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 48px;
+  margin-block: 12px;
+}
+.photo-assist input[type="checkbox"] {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  accent-color: var(--red);
+}
+.photo-assist .ai-file-label {
+  display: block;
+}
+.photo-assist input[type="file"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 12px 0;
+  font-size: 16px;
+}
+.ai-privacy,
+.ai-confirm {
+  padding: 16px;
+  background: #f5f5f6;
+  border: 1px solid #d8dadd;
+  border-radius: 16px;
+  margin-block: 16px;
+}
+.ai-privacy a {
+  text-decoration: underline;
+}
+.ai-candidate {
+  border-top: 1px solid #d8dadd;
+  padding-block: 16px;
+}
+.photo-assist .workflow-actions > * {
+  white-space: normal;
+}

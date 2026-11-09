@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "reviewDate": "2026-11-09",
+  "purpose": "Small development smoke collection only. No production accuracy claim. Expert labels and independent real-world negatives/unclear photos are release prerequisites.",
+  "cases": [
+    {
+      "id": "operator",
+      "file": "public/images/part-families/casement-crank-operator.webp",
+      "sha256": "db11b26e938a27b571127f19261a73690249106ee109205a81614fec89ce7622",
+      "expectedFamilies": ["operators"],
+      "expectedUnknown": false,
+      "review": "provisional visual review; not manufacturer verification",
+      "notes": "Visible geared operator and crank; family-level development label only."
+    },
+    {
+      "id": "roller",
+      "file": "public/images/part-families/patio-door-rollers.webp",
+      "sha256": "d10ce93593550d4a801bf6bbae8cae1291ca6adaf733d3469620da2011ab4516",
+      "expectedFamilies": ["rollers"],
+      "expectedUnknown": false,
+      "review": "provisional visual review; not manufacturer verification",
+      "notes": "Visible tandem wheels inside a metal housing."
+    },
+    {
+      "id": "handle",
+      "file": "public/images/part-families/patio-door-handle-set.webp",
+      "sha256": "4ff25651ef733bc73a04e631b212ef33becaa6555b54837195428e21c910a35e",
+      "expectedFamilies": ["handles", "patio-locks"],
+      "expectedUnknown": false,
+      "review": "provisional visual review; not manufacturer verification",
+      "notes": "Multi-part handle/lock assembly; either family is plausible."
+    },
+    {
+      "id": "hinge",
+      "file": "public/images/part-families/door-hinges.webp",
+      "sha256": "241624b74a0ddac3611c05b51efc7da5687205945792e50d7b7883af3ed48c53",
+      "expectedFamilies": ["hinges"],
+      "expectedUnknown": false,
+      "review": "provisional visual review; not manufacturer verification",
+      "notes": "Visible pivoting hinge plates and pin."
+    },
+    {
+      "id": "fin-lock",
+      "file": "public/images/part-families/sliding-window-fin-lock.webp",
+      "sha256": "469a330e466c717fa866d58c16bd37d32554ceed6625a97d8cc29f68c1c423cc",
+      "expectedFamilies": ["track-fin-locks"],
+      "expectedUnknown": false,
+      "review": "provisional visual review; not manufacturer verification",
+      "notes": "Visible fin/track locking pieces and installed context."
+    },
+    {
+      "id": "screen-latch",
+      "file": "public/images/part-families/screen-door-push-button-latch.webp",
+      "sha256": "19ebb24132f63d55120c39e8186200dae6f4b479c1ae3d2a4f35ec8f86808e41",
+      "expectedFamilies": ["screen-latches"],
+      "expectedUnknown": false,
+      "review": "provisional visual review; not manufacturer verification",
+      "notes": "Visible latch, keeper and screen-door installation."
+    },
+    {
+      "id": "ambiguous-lock",
+      "file": "public/images/part-families/window-sash-lock.webp",
+      "sha256": "e65be2f63e9962652310a8f8122dc7981f142d9d7ca3176c4477f7f5927d9438",
+      "expectedFamilies": null,
+      "expectedUnknown": false,
+      "review": "provisional visual review; not manufacturer verification",
+      "notes": "Mechanism differs from a typical sash cam lock. Needs hardware-expert review; filename is not ground truth."
+    },
+    {
+      "id": "ambiguous-balance",
+      "file": "public/images/part-families/window-balances.webp",
+      "sha256": "c3abbc9e810a7cd2ec48c5c91a32ba867808483c7468cdd0610ef8195b60b41e",
+      "expectedFamilies": null,
+      "expectedUnknown": false,
+      "review": "provisional visual review; not manufacturer verification",
+      "notes": "Loose spring assemblies do not establish the complete balance type. Needs hardware-expert review."
+    },
+    {
+      "id": "ambiguous-mortise",
+      "file": "public/images/part-families/patio-door-mortise-lock.webp",
+      "sha256": "c9566794396071fc742732bbc903db419aa0a26441b141bebd7a4f2b2d7e5c06",
+      "expectedFamilies": null,
+      "expectedUnknown": false,
+      "review": "provisional visual review; not manufacturer verification",
+      "notes": "Broad lock case; cannot verify sliding-patio application from this view."
+    },
+    {
+      "id": "ambiguous-closer",
+      "file": "public/images/part-families/storm-door-closer.webp",
+      "sha256": "02d97c1742d496b2d1d7d0a755d8870ad8de580a4fe02c090a4de8d8d15b5db9",
+      "expectedFamilies": null,
+      "expectedUnknown": false,
+      "review": "provisional visual review; not manufacturer verification",
+      "notes": "Articulated closer differs from a typical slim storm-door cylinder. Needs hardware-expert review."
+    },
+    {
+      "id": "unrelated-color-swatch.jpg",
+      "file": "tests/fixtures/color-swatch.jpg",
+      "sha256": "c5cd37f19fc9217bc365b8526651e0a649e86ba4cf00e8657b058af85ec20c3c",
+      "expectedFamilies": [],
+      "expectedUnknown": true,
+      "review": "non-hardware control",
+      "notes": "Existing solid-color test fixture, not a customer hardware photograph."
+    },
+    {
+      "id": "unrelated-color-swatch.webp",
+      "file": "tests/fixtures/color-swatch.webp",
+      "sha256": "82017c1aab9463512b298f44b6ae188d4df107ca7b0d9de6dcb8275d9808bb8f",
+      "expectedFamilies": [],
+      "expectedUnknown": true,
+      "review": "non-hardware control",
+      "notes": "Existing solid-color test fixture, not a customer hardware photograph."
+    }
+  ]
+}

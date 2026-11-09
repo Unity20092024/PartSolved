@@ -9,3 +9,6 @@ test-results/
 .DS_Store
 
 /artifacts/
+
+# Local Supabase CLI cache; shared migrations remain tracked.
+/supabase/.temp/
