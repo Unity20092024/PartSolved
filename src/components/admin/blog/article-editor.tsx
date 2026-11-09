@@ -13,6 +13,7 @@ import {
 } from "@/lib/blog/content";
 import { blogRequest } from "./client-api";
 import { LibraryManager } from "./library-manager";
+import { titleSlug } from "@/lib/blog/presentation";
 const RichEditor = dynamic(() => import("./rich-editor"), {
   ssr: false,
   loading: () => <p>Loading article editor…</p>,
@@ -290,7 +291,22 @@ export function ArticleEditor({
       <fieldset disabled={!enabled || locked || blocked}>
         <div className="admin-fields">
           {field("title", "Article title", 200)}
-          {field("slug", "URL slug", 100)}
+          <div className="admin-slug-field">
+            {field("slug", "URL slug", 100)}
+            <button
+              type="button"
+              className="button button-secondary"
+              disabled={!titleSlug(doc.title)}
+              onClick={() =>
+                change({
+                  ...current.current,
+                  slug: titleSlug(current.current.title),
+                })
+              }
+            >
+              Use title for URL
+            </button>
+          </div>
           {field("author", "Author’s real name", 120)}
           <label>
             Category
@@ -317,6 +333,20 @@ export function ArticleEditor({
           {imageSelect("featured_image_id", "Featured image")}
           {field("featured_alt", "Featured image alt text", 300)}
         </div>
+        <label className="admin-checkbox">
+          <input
+            type="checkbox"
+            checked={doc.is_featured === true}
+            onChange={(event) =>
+              change({ ...current.current, is_featured: event.target.checked })
+            }
+          />
+          Feature this article on the blog
+        </label>
+        <p className="blog-muted">
+          The featured selection becomes public only when you publish this
+          article.
+        </p>
         <h2>Article body</h2>
         <RichEditor
           value={doc.body}

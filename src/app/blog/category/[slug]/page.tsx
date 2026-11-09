@@ -54,7 +54,8 @@ export default async function CategoryPage({
       </nav>
       <h1>{category.name}</h1>
       <p>{category.description}</p>
-      <ArticleList articles={articles} />
+      <h2>Articles</h2>
+      <ArticleList articles={articles} categories={[category]} />
       <nav className="blog-pagination" aria-label="Article pages">
         {page > 1 && (
           <Link href={`/blog/category/${slug}?page=${page - 1}`}>

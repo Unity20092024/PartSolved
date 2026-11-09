@@ -19,9 +19,17 @@ export function blogConfig() {
   let anonymous = !!key?.startsWith("sb_publishable_");
   // Never let a misplaced service-role key bypass RLS in public article/media reads.
   if (key && !anonymous) {
-    try { anonymous = JSON.parse(Buffer.from(key.split(".")[1], "base64url").toString()).role === "anon"; } catch { anonymous = false; }
+    try {
+      anonymous =
+        JSON.parse(Buffer.from(key.split(".")[1], "base64url").toString())
+          .role === "anon";
+    } catch {
+      anonymous = false;
+    }
   }
-  return url && key && anonymous && url.startsWith("https://") ? { url, key } : null;
+  return url && key && anonymous && url.startsWith("https://")
+    ? { url, key }
+    : null;
 }
 export const writesEnabled = () =>
   process.env.BLOG_WRITES_ENABLED === "true" &&
@@ -187,6 +195,23 @@ export async function publicCategories(): Promise<BlogCategory[]> {
   if (error)
     throw new BlogError("Categories are temporarily unavailable.", 503);
   return data as BlogCategory[];
+}
+export async function featuredPublication(): Promise<Publication | null> {
+  const client = publicBlogClient();
+  if (!client) return null;
+  const { data, error } = await client
+    .from("blog_publications")
+    .select("*")
+    .eq("document->>is_featured", "true")
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error)
+    throw new BlogError(
+      "The featured article is temporarily unavailable.",
+      503,
+    );
+  return data as Publication | null;
 }
 export async function sitemapPublications(): Promise<Publication[]> {
   const client = publicBlogClient();

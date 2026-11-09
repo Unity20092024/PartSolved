@@ -149,7 +149,7 @@ test("SEO routes use www and do not expose drafts or administrative content", as
   );
   await page.goto("/blog");
   await expect(
-    page.getByRole("heading", { name: "Hardware advice, made practical." }),
+    page.getByRole("heading", { name: "BLOG", exact: true }),
   ).toBeVisible();
   expect((await request.get("/blog/unpublished-or-missing")).status()).toBe(
     404,
@@ -185,6 +185,17 @@ test("mobile editor autosaves, previews, publishes and schedules through seriali
   await expect
     .poll(() => state.article().document.title)
     .toBe("Window hardware help");
+  await page
+    .getByRole("button", { name: "Use title for URL", exact: true })
+    .click();
+  await expect(
+    page.getByRole("textbox", { name: "URL slug", exact: true }),
+  ).toHaveValue("window-hardware-help");
+  await page
+    .getByLabel("Feature this article on the blog", { exact: true })
+    .check();
+  await expect.poll(() => state.article().document.is_featured).toBe(true);
+  expect(state.article().status).toBe("draft");
   await page
     .getByLabel("Article title", { exact: true })
     .fill("Latest title before publishing");
@@ -245,7 +256,9 @@ test("typing during a background autosave preserves the newer text", async ({
     .toBe("Newer text while saving");
   await expect(input).toHaveValue("Newer text while saving");
   await page.getByRole("button", { name: "Save draft", exact: true }).click();
-  await expect(page.getByRole("status").last()).toHaveText("All changes saved.");
+  await expect(page.getByRole("status").last()).toHaveText(
+    "All changes saved.",
+  );
 });
 test("category management supports create, edit and confirmed delete", async ({
   page,

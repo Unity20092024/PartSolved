@@ -108,3 +108,5 @@ See [setup, privacy, pricing and release gates](docs/ai-photo-assist/README.md),
 The blog feature adds server-rendered `/blog` articles/categories, private `/admin/blog` publishing, structured rich text, optimistic autosave, private author-media storage, and scheduled publication support. Setup uses the **same Supabase project** as AI Photo Assist. No project, administrator, hosted migration or scheduled job is provisioned automatically; publishing writes and scheduling default off.
 
 See [blog setup and release gates](docs/blog/README.md) and [local database/browser test instructions](docs/blog/testing.md). Blog author-media uploads are separate from customer identification photos. No sample articles are published. The www canonical, sitemap and robots additions preserve the existing domain redirect and site functionality.
+
+The [blog redesign and actual publishing audit](docs/blog/redesign-and-publishing.md) records the remaining setup/hero-asset blockers and explains the Android publishing workflow after the backend is connected. Featured articles are an explicit publisher selection; card reading times are estimates derived from article text.

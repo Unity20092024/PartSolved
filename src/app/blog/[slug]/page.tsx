@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
-import { getPublication, listPublications } from "@/lib/blog/server";
+import {
+  getPublication,
+  listPublications,
+  publicCategories,
+} from "@/lib/blog/server";
 import { canonicalFor, jsonLd, mediaUrl } from "@/lib/blog/content";
 import { siteUrl, isPreviewDeployment } from "@/config/site";
 import { ArticleView } from "@/components/blog/article-view";
@@ -56,6 +60,7 @@ export default async function ArticlePage({
   const { article, redirect } = found;
   if (redirect) permanentRedirect(`/blog/${article.slug}`);
   const doc = article.document;
+  const categories = await publicCategories();
   const related = (
     await listPublications(article.category_id || undefined)
   ).articles
@@ -109,7 +114,7 @@ export default async function ArticlePage({
       {related.length > 0 && (
         <section>
           <h2>Related articles</h2>
-          <ArticleList articles={related} />
+          <ArticleList articles={related} categories={categories} />
         </section>
       )}
       <p>

@@ -1,31 +1,30 @@
-import Link from "next/link";
-import { type Publication } from "@/lib/blog/content";
+import { type Publication, type BlogCategory } from "@/lib/blog/content";
+import { articleCategoryLabel } from "@/lib/blog/presentation";
 import { BlogImage } from "./blog-image";
-export function ArticleList({ articles }: { articles: Publication[] }) {
+import { ArticleCard } from "./article-card";
+export function ArticleList({
+  articles,
+  categories = [],
+}: {
+  articles: Publication[];
+  categories?: BlogCategory[];
+}) {
   return (
     <div className="blog-grid">
-      {articles.map(({ post_id, document: doc, published_at }) => (
-        <article key={post_id} className="blog-card">
-          {doc.featured_image_id && (
-            <Link href={`/blog/${doc.slug}`} tabIndex={-1} aria-hidden="true">
-              <BlogImage id={doc.featured_image_id} alt="" />
-            </Link>
-          )}
-          <div>
-            <p className="blog-muted">
-              <time dateTime={published_at}>
-                {new Date(published_at).toLocaleDateString("en-US", {
-                  timeZone: "UTC",
-                })}
-              </time>
-            </p>
-            <h2>
-              <Link href={`/blog/${doc.slug}`}>{doc.title}</Link>
-            </h2>
-            <p>{doc.excerpt}</p>
-            <Link href={`/blog/${doc.slug}`}>Read article →</Link>
-          </div>
-        </article>
+      {articles.map((article) => (
+        <ArticleCard
+          key={article.post_id}
+          article={article}
+          categoryLabel={articleCategoryLabel(article.document, categories)}
+          image={
+            article.document.featured_image_id ? (
+              <BlogImage
+                id={article.document.featured_image_id}
+                alt={article.document.featured_alt}
+              />
+            ) : undefined
+          }
+        />
       ))}
     </div>
   );

@@ -17,6 +17,11 @@ import { readJson, blogFailure } from "@/lib/blog/http";
 import { ContentError } from "@/lib/blog/content";
 import { databaseError, blogConfig } from "@/lib/blog/server";
 import sharp from "sharp";
+import {
+  estimatedReadingMinutes,
+  titleSlug,
+  articleCategoryLabel,
+} from "@/lib/blog/presentation";
 import { normalizeArticleImage } from "@/lib/blog/images";
 test("image normalization independently enforces formats, dimensions, byte limits and metadata removal", async () => {
   const source = await sharp({
@@ -94,19 +99,49 @@ test("structured content rejects scripts, unsafe links, external images and inva
   };
   assert(!JSON.stringify(cleanBody(raw)).includes("onclick"));
 });
+test("article presentation uses real text, existing category labels and an explicit featured flag", () => {
+  const doc = emptyArticle("draft");
+  assert.equal(estimatedReadingMinutes(doc), null);
+  doc.body = {
+    type: "doc",
+    content: [
+      {
+        type: "paragraph",
+        content: [{ type: "text", text: Array(441).fill("word").join(" ") }],
+      },
+    ],
+  };
+  assert.equal(estimatedReadingMinutes(doc), 3);
+  assert.equal(
+    titleSlug("Measuring a Window's Latch!"),
+    "measuring-a-window-s-latch",
+  );
+  assert.equal(
+    articleCategoryLabel({ ...doc, hardware_category: "window-hardware" }),
+    "Window Hardware",
+  );
+  assert.equal(cleanDocument({ ...doc, is_featured: true }).is_featured, true);
+  assert.throws(() => cleanDocument({ ...doc, is_featured: "true" }));
+});
 test("mutation origins and bounded JSON fail closed", async () => {
-  const oldUrl = process.env.SUPABASE_URL, oldKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const oldUrl = process.env.SUPABASE_URL,
+    oldKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   try {
     process.env.SUPABASE_URL = "https://fixture.supabase.co";
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "sb_secret_local-fixture";
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY =
+      "sb_secret_local-fixture";
     assert.equal(blogConfig(), null);
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = `fixture.${Buffer.from(JSON.stringify({ role: "service_role" })).toString("base64url")}.fixture`;
     assert.equal(blogConfig(), null);
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_local-fixture";
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_local-fixture";
     assert(blogConfig());
   } finally {
-    if (oldUrl === undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL = oldUrl;
-    if (oldKey === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY; else process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = oldKey;
+    if (oldUrl === undefined) delete process.env.SUPABASE_URL;
+    else process.env.SUPABASE_URL = oldUrl;
+    if (oldKey === undefined)
+      delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    else process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = oldKey;
   }
   assert.equal(blogFailure(new ContentError("Add a title.")).status, 422);
   assert.throws(
@@ -297,7 +332,7 @@ test(
       await manage((client) =>
         client.query("select blog_save_post($1,2,$2)", [
           id,
-          { ...doc, title: "Private changed title" },
+          { ...doc, title: "Private changed title", is_featured: true },
         ]),
       );
       assert.equal(
@@ -334,6 +369,14 @@ test(
       );
       assert.equal(
         (await pool.query("select blog_publish_due() as n")).rows[0].n,
+        1,
+      );
+      assert.equal(
+        (
+          await pool.query(
+            "select count(*)::int n from blog_publications where document->>'is_featured'='true'",
+          )
+        ).rows[0].n,
         1,
       );
       assert.equal(

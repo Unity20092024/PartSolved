@@ -18,6 +18,7 @@ export const guideTopics = {
   orientation: "Left/right orientation",
 } as const;
 export interface ArticleDocument {
+  is_featured?: boolean;
   title: string;
   slug: string;
   excerpt: string;
@@ -263,6 +264,8 @@ export function cleanDocument(
 ): ArticleDocument {
   if (!object(value))
     throw new ContentError("Article information is required.");
+  if (value.is_featured !== undefined && typeof value.is_featured !== "boolean")
+    throw new ContentError("Check the featured article selection.");
   const read = (key: string, limit: number) => {
     if (typeof value[key] !== "string" || value[key].length > limit)
       throw new ContentError(`Check ${key.replaceAll("_", " ")}.`);
@@ -275,6 +278,7 @@ export function cleanDocument(
     return value[key];
   };
   const document: ArticleDocument = {
+    is_featured: value.is_featured === true,
     title: read("title", 200),
     slug: read("slug", 100),
     excerpt: read("excerpt", 500),

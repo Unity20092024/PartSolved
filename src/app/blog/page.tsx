@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { siteUrl, isPreviewDeployment } from "@/config/site";
-import { listPublications, publicCategories } from "@/lib/blog/server";
+import {
+  listPublications,
+  publicCategories,
+  featuredPublication,
+} from "@/lib/blog/server";
 import { ArticleList } from "@/components/blog/article-list";
+import { ArticleCard } from "@/components/blog/article-card";
+import { BlogLanding } from "@/components/blog/blog-landing";
+import { BlogImage } from "@/components/blog/blog-image";
+import { articleCategoryLabel } from "@/lib/blog/presentation";
 export const dynamic = "force-dynamic";
 export async function generateMetadata({
   searchParams,
@@ -32,48 +39,39 @@ export default async function BlogPage({
     1,
     Math.min(4000, Math.floor(Number((await searchParams).page) || 1)),
   );
-  const [result, categories] = await Promise.all([
+  const [result, categories, featured] = await Promise.all([
     listPublications(undefined, page),
     publicCategories(),
+    page === 1 ? featuredPublication() : Promise.resolve(null),
   ]);
+  const grid = result.articles.filter(
+    (article) => article.post_id !== featured?.post_id,
+  );
   return (
-    <main id="main-content" className="blog-shell">
-      <nav aria-label="Breadcrumb">
-        <Link href="/">Home</Link> / Blog
-      </nav>
-      <h1>Hardware advice, made practical.</h1>
-      <p className="blog-lead">
-        Understand the problem, learn what to measure, and take the next step
-        toward identifying your hardware.
-      </p>
-      <nav className="blog-filters" aria-label="Article categories">
-        <Link href="/blog">All articles</Link>
-        {categories.map((c) => (
-          <Link href={`/blog/category/${c.slug}`} key={c.id}>
-            {c.name}
-          </Link>
-        ))}
-      </nav>
-      {result.unavailable ? (
-        <p className="blog-notice">
-          Articles are not available yet. You can still use our{" "}
-          <Link href="/guides">identification guides</Link> and{" "}
-          <Link href="/find-part/guided">Guided Finder</Link>.
-        </p>
-      ) : !result.articles.length ? (
-        <p>
-          No published articles here yet. Explore our{" "}
-          <Link href="/guides">existing guides</Link> in the meantime.
-        </p>
-      ) : (
-        <ArticleList articles={result.articles} />
-      )}
-      <nav className="blog-pagination" aria-label="Article pages">
-        {page > 1 && <Link href={`/blog?page=${page - 1}`}>← Previous</Link>}
-        {page * 12 < result.count && (
-          <Link href={`/blog?page=${page + 1}`}>Next →</Link>
-        )}
-      </nav>
-    </main>
+    <BlogLanding
+      categories={categories}
+      cards={<ArticleList articles={grid} categories={categories} />}
+      featuredCard={
+        featured ? (
+          <ArticleCard
+            article={featured}
+            categoryLabel={articleCategoryLabel(featured.document, categories)}
+            featured
+            image={
+              featured.document.featured_image_id ? (
+                <BlogImage
+                  id={featured.document.featured_image_id}
+                  alt={featured.document.featured_alt}
+                />
+              ) : undefined
+            }
+          />
+        ) : undefined
+      }
+      unavailable={result.unavailable}
+      hasArticles={result.articles.length > 0}
+      page={page}
+      total={result.count}
+    />
   );
 }

@@ -25,7 +25,7 @@ export function CreateButton({ enabled }: { enabled: boolean }) {
           }
         }}
       >
-        Create article
+        New Article
       </button>
       {error && <p role="alert">{error}</p>}
     </div>
