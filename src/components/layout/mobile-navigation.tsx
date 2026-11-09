@@ -6,6 +6,7 @@ export const navigation = [
   { href: "/windows", label: "Windows" },
   { href: "/doors", label: "Doors" },
   { href: "/guides", label: "Guides" },
+  { href: "/blog", label: "Blog" },
   { href: "/support", label: "Support" },
 ];
 

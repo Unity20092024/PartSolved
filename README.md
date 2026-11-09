@@ -102,3 +102,9 @@ The feature branch adds optional, consent-based hardware-family assistance to th
 Server-side image validation, pinned-model structured responses, customer confirmation, local state preservation and atomic $1/day / $10/month accounting are implemented. The reserved maximum is $0.03/call; uncertain calls stay reserved across UTC period boundaries. This is not exact replacement matching and has no Strybuc catalog connection.
 
 See [setup, privacy, pricing and release gates](docs/ai-photo-assist/README.md), [verification](docs/ai-photo-assist/verification.md), and [.env.example](.env.example). Additional checks are `npm run test:ai`, `npm run test:ai:reviewer` (dedicated local test database required), and `npm run eval:ai` (manifest validation only; no API calls by default).
+
+## Blog and private publishing
+
+The blog feature adds server-rendered `/blog` articles/categories, private `/admin/blog` publishing, structured rich text, optimistic autosave, private author-media storage, and scheduled publication support. Setup uses the **same Supabase project** as AI Photo Assist. No project, administrator, hosted migration or scheduled job is provisioned automatically; publishing writes and scheduling default off.
+
+See [blog setup and release gates](docs/blog/README.md) and [local database/browser test instructions](docs/blog/testing.md). Blog author-media uploads are separate from customer identification photos. No sample articles are published. The www canonical, sitemap and robots additions preserve the existing domain redirect and site functionality.

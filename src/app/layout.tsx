@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { SiteHeader } from "@/components/layout/site-header";
 import { PhotoProvider } from "@/components/part-finder/photo-provider";
 import "./globals.css";
+import { SITE_ORIGIN } from "@/config/site";
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_ORIGIN),
   title: {
     default: "PartSolved™ | The Part Finder",
     template: "%s | PartSolved™",
