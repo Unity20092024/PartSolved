@@ -1,16 +1,18 @@
+import Link from "next/link";
 import { blogConfig } from "@/lib/blog/server";
 import { SetupNotice } from "@/components/admin/blog/setup-notice";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; activated?: string }>;
 }) {
   if (!blogConfig()) return <SetupNotice />;
-  const { error } = await searchParams;
+  const { error, activated } = await searchParams;
   return (
     <section className="blog-panel admin-login">
       <h1>Administrator sign in</h1>
       <p>Use your invited PartSolved administrator account.</p>
+      {activated === "1" && <p role="status">Password set. Sign in with your new password.</p>}
       {error && (
         <p role="alert" className="blog-notice">
           Sign in failed or administrator access was not granted.
@@ -41,6 +43,7 @@ export default async function LoginPage({
           Sign in
         </button>
       </form>
+      <p><Link href="/admin/blog/activate">Have an invitation or recovery code?</Link></p>
       <p>
         If you need access or a password reset, contact the site owner. Public
         account registration is unavailable.

@@ -1,13 +1,15 @@
 # PartSolved publishing
 
-This feature extends the existing Next.js site. It does **not** provision a Supabase project, apply hosted migrations, invite administrators, enable a cron job, merge, or deploy. There are no sample articles. Public pages work without client JavaScript; an unconfigured blog shows an honest unavailable state. All publishing writes default off.
+**Connection follow-up:** the owner has now created the dedicated PartSolved project. See [the current connection status and owner setup steps](./supabase-connection.md). The earlier implementation audit below describes the original unconfigured state; it is not evidence that hosted publishing has passed its release gate.
+
+This feature extends the existing Next.js site. The owner-created PartSolved Supabase project now has the reviewed migrations and private image bucket. Administrator provisioning, the server secret, Auth hardening and hosted publishing verification remain required; see the connection follow-up above. No sample articles, recurring publication job, merge or production deployment are part of this connection work. Public pages work without client JavaScript, and publishing writes default off.
 
 ## Connection required before launch
 
-Use **one PartSolved Supabase project**, shared with AI Photo Assist. None was configured in the repository or Vercel environment during this implementation. The connected Supabase account had no PartSolved project. Do not use an unrelated project or provision a second database. Project creation, plan selection and hosted migration application need the owner's approval.
+Use **one PartSolved Supabase project**, shared with AI Photo Assist: `apaojqpgsvikagwlfgci` (Part Solved, us-east-1). The original implementation had no project; the owner has since created this one and approved its connection. Do not use an unrelated project or provision a second database. No production environment or deployment has been configured by this follow-up.
 
-1. The owner selects or creates the approved project and reviews its region, costs, backups, storage allowances and availability. Free projects can pause; do not promise uninterrupted scheduling on a paused project.
-2. Review and apply the complete repository migration history in order, including `supabase/migrations/20261109194101_blog_publishing.sql`, to that same project. The earlier AI accounting migration is unchanged. Use a separate test environment first. The blog migration assumes Supabase-managed `auth` and `storage` schemas; it is not a generic PostgreSQL-only migration. It creates a **private** `blog-media` bucket, not public storage.
+1. The approved project already exists. Review costs, backups, storage allowances and availability before launch. Free projects can pause; do not promise uninterrupted scheduling on a paused project.
+2. The complete current repository migration history has been reviewed and applied in order to that project, including `supabase/migrations/20261109194101_blog_publishing.sql`. Do not reapply it. The earlier AI accounting migration is unchanged and AI remains disabled. The blog migration uses Supabase-managed `auth` and `storage` schemas and creates a **private** `blog-media` bucket, not public storage.
 3. Configure environment values through the hosting dashboard or local ignored `.env.local`, **never chat, Git, screenshots or a PR**. Names only:
    - `SUPABASE_URL` (or `NEXT_PUBLIC_SUPABASE_URL`): project URL.
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: project publishable key. Intentionally public, never a secret/service key.
@@ -15,7 +17,7 @@ Use **one PartSolved Supabase project**, shared with AI Photo Assist. None was c
    - `BLOG_ADMIN_ORIGIN`: exact dashboard origin, without trailing slash. Production uses `https://www.partsolved.com`; local development uses `http://127.0.0.1:3000`. Set a preview's exact origin separately. This does not change canonical URLs or domain redirects.
    - `BLOG_WRITES_ENABLED`: keep `false` until migration and authorization/storage checks pass.
    - `BLOG_SCHEDULER_READY`: keep `false` until the recurring publication job is approved, running and tested.
-4. In Supabase Auth, disable public signups and invite/create the real administrator using the owner-controlled dashboard. Configure the real site's Auth URLs and password policy. Configure email/SMTP and recovery through Supabase if required; this release has no public signup or reset workflow. Enable Auth abuse controls/rate limits; review Vercel firewall limits for `/api/blog/auth` before launch. No fabricated admin credentials or default password is supplied.
+4. In Supabase Auth, disable public signups and invite the real administrator using the owner-controlled dashboard. Configure Auth URLs, password policy, email/SMTP and abuse controls/rate limits. The private activation form accepts owner-issued invitation/recovery codes; follow the exact email-template and membership steps in the connection guide. There is no public signup or public recovery-email request route. Review Vercel firewall limits for `/api/blog/auth` and `/api/blog/activate` before launch. No fabricated credentials or default password is supplied.
 5. Grant membership to the actual Auth user UUID using the owner's SQL editor:
 
    ```sql
