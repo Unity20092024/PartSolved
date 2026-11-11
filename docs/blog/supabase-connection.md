@@ -4,6 +4,14 @@
 
 The dedicated project is **Part Solved**, reference `apaojqpgsvikagwlfgci`, region `us-east-1`. Use only this project. Do not use Kalshi or create a second database for AI Photo Assist.
 
+This work is isolated on `feat/blog-supabase-connection`, [pull request #11](https://github.com/Unity20092024/PartSolved/pull/11). Preview protection is retained:
+
+- [Preview blog](https://partsolved-git-feat-blog-supabase-b1a8a3-dees-projects-ac22187b.vercel.app/blog)
+- [Private dashboard/sign in](https://partsolved-git-feat-blog-supabase-b1a8a3-dees-projects-ac22187b.vercel.app/admin/blog)
+- [Invitation/recovery activation](https://partsolved-git-feat-blog-supabase-b1a8a3-dees-projects-ac22187b.vercel.app/admin/blog/activate)
+
+The preview blog is connected but empty. The sign-in and activation forms are available; this does not mean a real administrator has already been invited or that publishing has been enabled.
+
 On 11 November 2026 the two reviewed repository migrations were applied to this previously empty project: AI accounting followed by blog publishing. All nine application tables have RLS enabled. The `blog-media` bucket is private, allows WebP only, and limits each object to 2 MiB. AI remains disabled; no scheduler or recurring paid service was enabled. No sample articles or Auth users were created.
 
 Hosted migration versions were aligned with the existing repository filenames (`20261109052500` and `20261109194101`) after the management tool assigned execution-time versions. Future CLI migration runs must see these as applied; do not reapply them. No schema SQL was changed during that bookkeeping correction.
