@@ -30,6 +30,8 @@ export default defineConfig({
   webServer: {
     command: "npm run start",
     url: "http://127.0.0.1:3000",
+    // Mutation-origin tests must be deterministic with or without local setup.
+    env: { BLOG_ADMIN_ORIGIN: "http://127.0.0.1:3000" },
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
   },
