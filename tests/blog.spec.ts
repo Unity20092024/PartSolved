@@ -160,7 +160,9 @@ test("SEO routes use www and do not expose drafts or administrative content", as
     /noindex/,
   );
   await expect(
-    page.getByRole("heading", { name: "Blog setup required" }),
+    // Anonymous visitors reach sign-in once Supabase is connected; otherwise
+    // they see setup guidance. Neither state exposes the dashboard or drafts.
+    page.getByRole("heading", { name: /^(Blog setup required|Administrator sign in)$/ }),
   ).toBeVisible();
   for (const route of [
     "/api/blog/posts",

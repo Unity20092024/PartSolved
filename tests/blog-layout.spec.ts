@@ -29,7 +29,9 @@ test("public blog shows the photograph, accessible hero and honest empty state w
   await expect(page.locator(".blog-card")).toHaveCount(0);
   await expect(
     page.getByRole("heading", {
-      name: "Our article library is getting ready.",
+      // A real connected database with zero publications has a different empty
+      // state from an application with no configured database.
+      name: /^(Our article library is getting ready\.|Good advice is on the way\.)$/,
     }),
   ).toBeVisible();
   for (const width of [320, 375, 390, 430, 768, 1024, 1280]) {

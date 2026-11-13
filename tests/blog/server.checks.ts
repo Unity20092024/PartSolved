@@ -23,6 +23,41 @@ import {
   articleCategoryLabel,
 } from "@/lib/blog/presentation";
 import { normalizeArticleImage } from "@/lib/blog/images";
+import { activationInput, activateAdministrator } from "@/lib/blog/activation";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+test("invitation activation validates inputs and cannot create accounts or assign administrator access", async () => {
+  const form = new URLSearchParams({email: "owner@example.test", token: "123456", password: "long-test-password", confirmation: "long-test-password", type: "invite"});
+  const input = activationInput(form);
+  for (const [name, value] of [["type", "signup"], ["token", ""], ["token", "not-a-code"], ["email", "invalid"], ["confirmation", "different"], ["password", "short"]]) {
+    const invalid = new URLSearchParams(form);
+    invalid.set(name, value);
+    assert.throws(() => activationInput(invalid));
+  }
+  const recovery = new URLSearchParams(form); recovery.set("type", "recovery");
+  assert.equal(activationInput(recovery).type, "recovery");
+  let allowed = false, verificationError = false, passwordError = false;
+  const calls: string[] = [];
+  const client = {
+    auth: {
+      verifyOtp: async (value: unknown) => { calls.push("verify"); assert.deepEqual(value, {email: input.email, token: input.token, type: "invite"}); return {error: verificationError ? new Error("expired") : null}; },
+      updateUser: async () => { calls.push("password"); return {error: passwordError ? new Error("policy") : null}; },
+      signOut: async () => { calls.push("logout"); return {error: null}; },
+    },
+    rpc: async (name: string) => { assert.equal(name, "blog_is_admin"); calls.push("membership"); return {data: allowed, error: null}; },
+  } as unknown as SupabaseClient;
+  await assert.rejects(activateAdministrator(client, input), /publishing access/);
+  assert.deepEqual(calls, ["verify", "membership", "logout"]);
+  calls.length = 0; verificationError = true;
+  await assert.rejects(activateAdministrator(client, input), /invalid or expired/);
+  assert.deepEqual(calls, ["verify"]);
+  calls.length = 0; verificationError = false; allowed = true;
+  await activateAdministrator(client, input);
+  assert.deepEqual(calls, ["verify", "membership", "password", "logout"]);
+  calls.length = 0; passwordError = true;
+  await assert.rejects(activateAdministrator(client, input), /password could not be set/);
+  assert.deepEqual(calls, ["verify", "membership", "password", "logout"]);
+});
 test("image normalization independently enforces formats, dimensions, byte limits and metadata removal", async () => {
   const source = await sharp({
     create: { width: 2400, height: 1200, channels: 3, background: "white" },

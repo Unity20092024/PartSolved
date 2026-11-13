@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "test:ai": "node tests/helpers/build-ai-tests.mjs && node --test test-results/ai/server-tests.cjs",
-    "test:blog": "node tests/helpers/build-blog-tests.mjs && node --test test-results/blog/server-tests.cjs",
+    "test:blog": "node tests/helpers/build-blog-tests.mjs && node test-results/blog/server-tests.cjs",
     "eval:ai": "node scripts/evaluate-photo-assist.mjs",
     "test:ai:reviewer": "node tests/helpers/reviewer-smoke.mjs"
   },
