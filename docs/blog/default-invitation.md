@@ -6,6 +6,14 @@ Keep the Supabase Site URL at `https://www.partsolved.com`. Public signups were 
 
 ## Preview activation from Android
 
+Verified branch: `feat/admin-invitation-link`, [PR #12](https://github.com/Unity20092024/PartSolved/pull/12). The exact **Preview activation page and Supabase Redirect URLs entry** is:
+
+```text
+https://partsolved-git-feat-admin-invitat-7b2df1-dees-projects-ac22187b.vercel.app/admin/blog/activate
+```
+
+The exact Preview sign-in address is the same origin followed by `/admin/blog/login`. Production remains unchanged. The old `feat/blog-supabase-connection` Preview does not contain this fix.
+
 1. Open the feature branch Preview's `/admin/blog/activate` page in Android Chrome. Sign into Vercel if prompted; keep deployment protection enabled. Expand **Testing in Preview? Open your original invitation here**.
 2. Copy the **exact activation address displayed there** into Supabase → Authentication → URL Configuration → Redirect URLs. No wildcard, `/auth/callback`, or API route is needed. The browser return path is `/admin/blog/activate`; `/api/blog/activate/session` is a POST endpoint, not a Supabase redirect destination. Do not change the production Site URL. Adding an allowlist entry does not automatically change where the default email points.
 3. Only after the owner approves sending, use Supabase Authentication → Users → Invite user for the approved email. Keep the default email template. Do not send a test invitation without approval.
