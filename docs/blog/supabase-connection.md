@@ -25,29 +25,10 @@ The connected tools support database migrations and Vercel configuration, but **
 1. Open the dedicated [Supabase project](https://supabase.com/dashboard/project/apaojqpgsvikagwlfgci). Under Authentication → Sign In / Providers, disable new user signups. Keep email login enabled. Review Auth rate limits, password policy, email delivery and abuse controls. The initial live check found signups enabled; database membership still independently prevents public users from publishing.
 2. In Project Settings → API Keys, copy the **server secret** directly into Vercel → PartSolved → Settings → Environment Variables as `SUPABASE_SECRET_KEY`. Use the **Sensitive** type, target **Preview**, and restrict it to `feat/blog-supabase-connection`. Do not use a `NEXT_PUBLIC_` prefix. Do not add production variables yet.
 3. The agent configures `SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `BLOG_ADMIN_ORIGIN`, `BLOG_WRITES_ENABLED=false`, and `BLOG_SCHEDULER_READY=false` for that preview branch. `BLOG_ADMIN_ORIGIN` must be the actual stable branch preview origin. Public article canonicals remain `https://www.partsolved.com`.
-4. Configure Supabase Auth's Site URL to the preview origin during testing. Use the final preview activation URL below in the invitation and password recovery email templates. Include `{{ .Token }}` as a visible one-time code, rather than the default implicit-flow confirmation link:
-
-   ```html
-   <h2>PartSolved administrator invitation</h2>
-   <p>Your one-time code: <strong>{{ .Token }}</strong></p>
-   <p>Open the private activation address provided by the site owner, enter your email and this code, then choose your password.</p>
-   <p>If you did not expect this invitation, ignore it. Never share this code.</p>
-   ```
-
-   The recovery template should use the same code instructions with a password-recovery heading. Set a short code expiry and review email rate limits. Owner-issued invitations/recovery only; there is no public registration or public invitation endpoint. Mail scanners cannot consume the code by prefetching a link because verification requires a deliberate form POST.
-5. In Authentication → Users → Invite user, invite the owner's approved administrator email. Supabase's default email service may restrict delivery to organization-member addresses; configure an approved SMTP provider if delivery is restricted. Do not claim delivery succeeded without checking.
-6. Grant **only that actual invited Auth user's UUID** membership using the project's SQL editor (or ask the agent to grant it after the invitation exists):
-
-   ```sql
-   insert into blog_private.administrators(user_id)
-   select id from auth.users
-   where id = 'REPLACE-WITH-ACTUAL-INVITED-USER-UUID'::uuid
-     and invited_at is not null
-   on conflict (user_id) do nothing;
-   ```
-
-   Do not grant all authenticated accounts access, derive roles from user metadata, or create users by inserting into `auth.users`. This step records authorization, not a default password.
-7. On Android, open `PREVIEW_ORIGIN/admin/blog/activate`, enter the invited email, select **Administrator invitation**, enter the emailed code, and choose a unique password of 12–128 characters. Successful activation ends that session and requires a fresh password login at `/admin/blog/login`. If membership is not ready, the code expired, or email was scanned/consumed elsewhere, request a new owner-issued invitation/recovery code. Recovery uses the same screen with **Password recovery** selected. No code/password is placed in a URL or logged by the application.
+4. Keep Supabase's Site URL at `https://www.partsolved.com`. The default Invite user template is supported by the new [default-link activation flow](./default-invitation.md). No custom template, emailed code or SMTP purchase is required for an eligible organization-team test recipient. Add only the exact Preview activation address documented in that guide to Redirect URLs; the allowlist does not automatically change a default invitation's target.
+5. Once the owner authorizes sending, invite the approved email through Supabase Authentication → Users. Do not send invitations as part of automated testing. Built-in delivery is limited to organization-team addresses and rate limits; it is not guaranteed.
+6. Independently grant membership to the real invited Auth user, after verifying the exact user UUID and email, using the owner-controlled SQL editor. Do not grant based on user metadata or expose a membership-grant route. See the reviewed SQL in the default-link guide.
+7. On Android, follow the default confirmation link, verify the displayed account, then set a password after membership has been granted. For Preview, use the copied-link helper described in the guide so no production Site URL change is needed. Accepting an invitation alone grants no publishing permission. Credentials stay out of app URLs, browser storage and analytics; session cookies are HTTP-only. A fresh password login is required after setup.
 
 ## Release gate and hosted verification
 

@@ -7,6 +7,7 @@ export async function proxy(request: NextRequest) {
   if (!url || !key) {
     response.headers.set("Cache-Control", "private, no-store");
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    response.headers.set("Referrer-Policy", "no-referrer");
     return response;
   }
   const client = createServerClient(url, key, {
@@ -42,6 +43,7 @@ export async function proxy(request: NextRequest) {
   }
   response.headers.set("Cache-Control", "private, no-store");
   response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  response.headers.set("Referrer-Policy", "no-referrer");
   return response;
 }
 export const config = { matcher: ["/admin/blog/:path*", "/api/blog/:path*"] };

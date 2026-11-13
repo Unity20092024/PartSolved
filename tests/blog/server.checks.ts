@@ -23,40 +23,60 @@ import {
   articleCategoryLabel,
 } from "@/lib/blog/presentation";
 import { normalizeArticleImage } from "@/lib/blog/images";
-import { activationInput, activateAdministrator } from "@/lib/blog/activation";
+import { passwordInput, acceptInvitation, setAdministratorPassword } from "@/lib/blog/activation";
+import { invitationFragment, invitationConfirmationUrl, isInvitationLanding } from "@/lib/blog/invitation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-test("invitation activation validates inputs and cannot create accounts or assign administrator access", async () => {
-  const form = new URLSearchParams({email: "owner@example.test", token: "123456", password: "long-test-password", confirmation: "long-test-password", type: "invite"});
-  const input = activationInput(form);
-  for (const [name, value] of [["type", "signup"], ["token", ""], ["token", "not-a-code"], ["email", "invalid"], ["confirmation", "different"], ["password", "short"]]) {
-    const invalid = new URLSearchParams(form);
-    invalid.set(name, value);
-    assert.throws(() => activationInput(invalid));
-  }
-  const recovery = new URLSearchParams(form); recovery.set("type", "recovery");
-  assert.equal(activationInput(recovery).type, "recovery");
-  let allowed = false, verificationError = false, passwordError = false;
+test("default invitation parsing restricts the project and redirect; fragments never become trusted roles", () => {
+  const project = "https://apaojqpgsvikagwlfgci.supabase.co", callback = "https://preview.example/admin/blog/activate";
+  const original = `${project}/auth/v1/verify?token=${"a".repeat(64)}&type=invite&redirect_to=https://attacker.invalid/`;
+  const target = new URL(invitationConfirmationUrl(original, project, callback));
+  assert.equal(target.origin, project);
+  assert.equal(target.searchParams.get("redirect_to"), callback);
+  for (const invalid of [original.replace(project, "https://attacker.invalid"), original.replace("https:", "http:"), original.replace("type=invite", "type=signup"), original.replace("/auth/v1/verify", "/other")])
+    assert.throws(() => invitationConfirmationUrl(invalid, project, callback));
+  assert.deepEqual(invitationFragment("#access_token=untrusted&refresh_token=test-refresh-credential&type=invite&role=admin"), {refresh_token: "test-refresh-credential"});
+  assert.throws(() => invitationFragment("#access_token=x&refresh_token=test-refresh-credential&type=signup"));
+  assert.throws(() => invitationFragment("#error=access_denied&error_code=otp_expired"), /expired/);
+  assert.equal(isInvitationLanding("#access_token=untrusted"), true);
+  assert.equal(isInvitationLanding("#measurements"), false);
+});
+test("invitation acceptance and password setting independently verify the user and membership", async () => {
+  const form = new URLSearchParams({password: "long-test-password", confirmation: "long-test-password"});
+  assert.equal(passwordInput(form), "long-test-password");
+  assert.throws(() => passwordInput(new URLSearchParams({password: "short", confirmation: "short"})));
   const calls: string[] = [];
+  let allowed = false, expired = false, userInvalid = false, deniedPassword = false;
+  const user = {id: "invited-user", email: "owner@example.test", invited_at: "2026-11-13", email_confirmed_at: "2026-11-13"};
+  const session = {access_token: "synthetic-access", refresh_token: "synthetic-refresh", user};
   const client = {
     auth: {
-      verifyOtp: async (value: unknown) => { calls.push("verify"); assert.deepEqual(value, {email: input.email, token: input.token, type: "invite"}); return {error: verificationError ? new Error("expired") : null}; },
-      updateUser: async () => { calls.push("password"); return {error: passwordError ? new Error("policy") : null}; },
+      refreshSession: async () => { calls.push("refresh"); return {data: {session: expired ? null : session}, error: expired ? new Error("expired") : null}; },
+      getUser: async () => { calls.push("verify"); return {data: {user: userInvalid ? {...user, invited_at: null} : user}, error: null}; },
+      updateUser: async () => { calls.push("password"); return {error: deniedPassword ? new Error("policy") : null}; },
       signOut: async () => { calls.push("logout"); return {error: null}; },
     },
     rpc: async (name: string) => { assert.equal(name, "blog_is_admin"); calls.push("membership"); return {data: allowed, error: null}; },
   } as unknown as SupabaseClient;
-  await assert.rejects(activateAdministrator(client, input), /publishing access/);
-  assert.deepEqual(calls, ["verify", "membership", "logout"]);
-  calls.length = 0; verificationError = true;
-  await assert.rejects(activateAdministrator(client, input), /invalid or expired/);
-  assert.deepEqual(calls, ["verify"]);
-  calls.length = 0; verificationError = false; allowed = true;
-  await activateAdministrator(client, input);
+  const pending = await acceptInvitation(client, "synthetic-refresh");
+  assert.equal(pending.allowed, false);
+  assert.deepEqual(calls, ["refresh", "verify", "membership"]);
+  calls.length = 0;
+  await assert.rejects(setAdministratorPassword(client, passwordInput(form)), /administrator membership/);
+  assert(!calls.includes("password"));
+  allowed = true; calls.length = 0;
+  await setAdministratorPassword(client, passwordInput(form));
   assert.deepEqual(calls, ["verify", "membership", "password", "logout"]);
-  calls.length = 0; passwordError = true;
-  await assert.rejects(activateAdministrator(client, input), /password could not be set/);
-  assert.deepEqual(calls, ["verify", "membership", "password", "logout"]);
+  allowed = false; calls.length = 0;
+  await assert.rejects(setAdministratorPassword(client, passwordInput(form)), /administrator membership/);
+  assert(!calls.includes("password"));
+  expired = true;
+  await assert.rejects(acceptInvitation(client, "synthetic-refresh"), /expired/);
+  expired = false; userInvalid = true;
+  await assert.rejects(acceptInvitation(client, "synthetic-refresh"), /owner-invited/);
+  userInvalid = false; allowed = true; deniedPassword = true; calls.length = 0;
+  await assert.rejects(setAdministratorPassword(client, passwordInput(form)), /password could not be set/);
+  assert(!calls.includes("logout"));
 });
 test("image normalization independently enforces formats, dimensions, byte limits and metadata removal", async () => {
   const source = await sharp({

@@ -1,35 +1,38 @@
-import { BlogError } from "./server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { BlogError } from "./server";
 
-/** Only an owner-issued invitation/recovery code can establish a session. */
-export function activationInput(form: URLSearchParams) {
-  const email = (form.get("email") || "").trim();
-  const token = (form.get("token") || "").trim();
+export function passwordInput(form: URLSearchParams) {
   const password = form.get("password") || "";
-  const type = form.get("type");
-  if (
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 ||
-    !/^\d{6,10}$/.test(token) ||
-    (type !== "invite" && type !== "recovery") ||
-    password.length < 12 || password.length > 128 ||
-    password !== form.get("confirmation")
-  ) throw new BlogError("Check your email, code, and matching passwords (12–128 characters).");
-  return { email, token, password, type };
+  if (password.length < 12 || password.length > 128 || password !== form.get("confirmation"))
+    throw new BlogError("Enter matching passwords of 12–128 characters.");
+  return password;
 }
 
-export async function activateAdministrator(client: SupabaseClient, input: ReturnType<typeof activationInput>) {
-  const { password, ...verification } = input;
-  const { error } = await client.auth.verifyOtp(verification);
-  if (error) throw new BlogError("The code is invalid or expired. Ask the site owner for a new code.", 401);
-  try {
-    // A valid email code is authentication, never permission to publish.
-    const { data: allowed, error: membershipError } = await client.rpc("blog_is_admin");
-    if (membershipError || allowed !== true)
-      throw new BlogError("Ask the site owner to confirm your publishing access.", 403);
-    const { error: passwordError } = await client.auth.updateUser({ password });
-    if (passwordError) throw new BlogError("The password could not be set. Ask the site owner for a new code and check the password policy.");
-  } finally {
-    // Require a fresh password login and discard invitation/recovery sessions.
-    await client.auth.signOut({ scope: "local" });
-  }
+/** Supabase validates the credential; this function never creates users or grants roles. */
+export async function acceptInvitation(client: SupabaseClient, refreshToken: unknown) {
+  if (typeof refreshToken !== "string" || !/^[A-Za-z0-9._-]{8,2048}$/.test(refreshToken))
+    throw new BlogError("The invitation session is missing or invalid.");
+  const { data, error } = await client.auth.refreshSession({ refresh_token: refreshToken });
+  if (error || !data.session)
+    throw new BlogError("This invitation is invalid, expired, or already used. Ask the owner for a new invitation or recovery email.", 401);
+  const { data: verified, error: verificationError } = await client.auth.getUser();
+  if (verificationError || !verified.user || verified.user.is_anonymous ||
+      !verified.user.invited_at || !verified.user.email_confirmed_at ||
+      verified.user.id !== data.session.user.id)
+    throw new BlogError("A confirmed, owner-invited account is required.", 403);
+  const { data: allowed, error: membershipError } = await client.rpc("blog_is_admin");
+  if (membershipError) throw new BlogError("Publishing access could not be verified. Try again later.", 503);
+  return { session: data.session, email: verified.user.email, allowed: allowed === true };
+}
+
+export async function setAdministratorPassword(client: SupabaseClient, password: string) {
+  const { data: { user }, error } = await client.auth.getUser();
+  if (error || !user || !user.invited_at || !user.email_confirmed_at || user.is_anonymous)
+    throw new BlogError("Accept your owner-issued invitation first.", 401);
+  const { data: allowed, error: permission } = await client.rpc("blog_is_admin");
+  if (permission || allowed !== true)
+    throw new BlogError("The owner must grant administrator membership before you can activate publishing access.", 403);
+  const { error: passwordError } = await client.auth.updateUser({ password });
+  if (passwordError) throw new BlogError("The password could not be set. Check the password policy and try again.");
+  await client.auth.signOut({ scope: "local" });
 }
