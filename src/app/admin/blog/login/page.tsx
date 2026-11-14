@@ -43,7 +43,7 @@ export default async function LoginPage({
           Sign in
         </button>
       </form>
-      <p><Link href="/admin/blog/activate">Have an invitation or recovery code?</Link></p>
+      <p><Link href="/admin/blog/activate">Accept an invitation or recovery link</Link></p>
       <p>
         If you need access or a password reset, contact the site owner. Public
         account registration is unavailable.
