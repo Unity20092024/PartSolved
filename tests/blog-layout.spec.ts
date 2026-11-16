@@ -7,7 +7,7 @@ test.beforeAll(async () => {
   await mkdir(output, { recursive: true });
   await buildBlogLayoutHarness(output);
 });
-test("public blog shows the photograph, accessible hero and honest empty state without fabricated articles", async ({
+test("public blog shows the photograph, accessible hero and published cards or an honest empty state", async ({
   page,
 }) => {
   await page.goto("/blog");
@@ -26,14 +26,18 @@ test("public blog shows the photograph, accessible hero and honest empty state w
   await expect(
     page.getByRole("heading", { name: "All Articles", exact: true }),
   ).toBeVisible();
-  await expect(page.locator(".blog-card")).toHaveCount(0);
-  await expect(
-    page.getByRole("heading", {
-      // A real connected database with zero publications has a different empty
-      // state from an application with no configured database.
+  // The connected owner may now have real published articles. Never delete or
+  // replace their data just to recreate the original unconfigured empty state.
+  const cards = page.locator(".blog-card");
+  if (await cards.count()) {
+    await expect(cards.first().getByRole("heading")).toBeVisible();
+    await expect(cards.first().getByRole("link", {name:/^Read article:/})).toHaveAttribute("href", /^\/blog\//);
+    await expect(cards.first().locator(".blog-card-excerpt")).not.toBeEmpty();
+  } else {
+    await expect(page.getByRole("heading", {
       name: /^(Our article library is getting ready\.|Good advice is on the way\.)$/,
-    }),
-  ).toBeVisible();
+    })).toBeVisible();
+  }
   for (const width of [320, 375, 390, 430, 768, 1024, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     expect(

@@ -308,7 +308,8 @@ test("category management supports create, edit and confirmed delete", async ({
 test("image management validates uploads and connects the selected image to the article", async ({
   page,
 }) => {
-  await editor(page);
+  const state = await editor(page);
+  page.on("dialog", (dialog) => dialog.accept());
   const mediaId = "db000000-0000-4000-8000-000000000003";
   let uploadedBytes = 0;
   await page.route("**/api/blog/media", async (route) => {
@@ -360,15 +361,27 @@ test("image management validates uploads and connects the selected image to the 
   ).toBeVisible();
   expect(uploadedBytes).toBeGreaterThan(0);
   expect(uploadedBytes).toBeLessThan(2 * 1024 * 1024);
+  expect(state.article().document.featured_image_id).toBeNull();
   await page
-    .getByRole("combobox", { name: "Featured image", exact: true })
-    .selectOption(mediaId);
-  await page
-    .getByLabel("Featured image alt text", { exact: true })
-    .fill("A window sash lock");
+    .getByRole("button", { name: "Use as featured image", exact: true })
+    .click();
   await expect(
     page.getByRole("combobox", { name: "Featured image", exact: true }),
   ).toHaveValue(mediaId);
+  await expect(page.getByLabel("Featured image alt text", { exact: true })).toHaveValue("A window sash lock");
+  await expect(page.getByLabel("Featured image preview").getByRole("img")).toHaveAttribute("src", `/blog/media/${mediaId}`);
+  await expect.poll(() => state.article().document.featured_image_id).toBe(mediaId);
+  expect(state.article().document.featured_alt).toBe("A window sash lock");
+  await page.getByLabel("Article title", {exact:true}).fill("Local featured-image test");
+  await page.getByRole("button", {name:"Publish", exact:true}).click();
+  await expect.poll(() => state.article().status).toBe("published");
+  expect(state.article().document.featured_image_id).toBe(mediaId);
+  // The dropdown remains functional and clears stale image alt text when removed.
+  await page.getByRole("combobox", {name:"Featured image",exact:true}).selectOption("");
+  await expect(page.getByLabel("Featured image alt text",{exact:true})).toHaveValue("");
+  await expect.poll(() => state.article().document.featured_image_id).toBeNull();
+  await page.getByRole("combobox", {name:"Featured image",exact:true}).selectOption(mediaId);
+  await expect(page.getByLabel("Featured image alt text",{exact:true})).toHaveValue("A window sash lock");
 });
 test("duplicate and confirmed deletion use meaningful article actions", async ({
   page,

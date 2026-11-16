@@ -13,12 +13,16 @@ export function LibraryManager({
   enabled,
   onMedia,
   onCategories,
+  onFeaturedImage,
+  featuredImageId,
 }: {
   categories: BlogCategory[];
   media: BlogMedia[];
   enabled: boolean;
   onMedia?: (media: BlogMedia[]) => void;
   onCategories?: (categories: BlogCategory[]) => void;
+  onFeaturedImage?: (image: BlogMedia) => void;
+  featuredImageId?: string | null;
 }) {
   const [categories, setCategories] = useState(initialCategories),
     [media, setMedia] = useState(initialMedia),
@@ -221,6 +225,17 @@ export function LibraryManager({
                 {item.width} × {item.height} · {Math.ceil(item.bytes / 1024)}{" "}
                 KiB
               </p>
+              {onFeaturedImage && item.state === "ready" && (
+                <button
+                  type="button"
+                  className="button button-secondary"
+                  disabled={!enabled || busy}
+                  aria-pressed={featuredImageId === item.id}
+                  onClick={() => onFeaturedImage(item)}
+                >
+                  {featuredImageId === item.id ? "Featured image selected" : "Use as featured image"}
+                </button>
+              )}
               <form
                 onSubmit={(event) => {
                   event.preventDefault();

@@ -1,10 +1,12 @@
 "use client";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   guideTopics,
+  mediaUrl,
   wordCount,
   type Article,
   type ArticleDocument,
@@ -235,9 +237,14 @@ export function ArticleEditor({
       {label}
       <select
         value={doc[key] || ""}
-        onChange={(e) =>
-          change({ ...current.current, [key]: e.target.value || null })
-        }
+        onChange={(e) => {
+          const id = e.target.value || null;
+          const altKey = key === "featured_image_id" ? "featured_alt" : "social_alt";
+          const selected = media.find((image) => image.id === id);
+          change({ ...current.current, [key]: id,
+            [altKey]: !id ? "" : id === current.current[key] ? current.current[altKey] : selected?.alt || current.current[altKey],
+          });
+        }}
       >
         <option value="">None</option>
         {doc[key] && !media.some((m) => m.id === doc[key]) && (
@@ -332,6 +339,15 @@ export function ArticleEditor({
           </div>
           {imageSelect("featured_image_id", "Featured image")}
           {field("featured_alt", "Featured image alt text", 300)}
+          <div className="admin-wide admin-featured-preview" aria-label="Featured image preview">
+            {doc.featured_image_id ? <>
+              <Image src={mediaUrl(doc.featured_image_id)} alt={doc.featured_alt || "Selected article image"}
+                width={media.find((image) => image.id === doc.featured_image_id)?.width || 800}
+                height={media.find((image) => image.id === doc.featured_image_id)?.height || 450}
+                unoptimized />
+              <p>This image appears on the blog card and at the top of the article after you publish the update.</p>
+            </> : <p className="blog-notice">No main image selected. Uploading adds an image to your library. Choose it under Featured image above, or tap Use as featured image beside its thumbnail below, then publish the update.</p>}
+          </div>
         </div>
         <label className="admin-checkbox">
           <input
@@ -344,8 +360,9 @@ export function ArticleEditor({
           Feature this article on the blog
         </label>
         <p className="blog-muted">
-          The featured selection becomes public only when you publish this
-          article.
+          Featuring an article chooses its position on the blog. Choose a
+          Featured image above to add its main photo. Changes appear only after
+          you publish the update.
         </p>
         <h2>Article body</h2>
         <RichEditor
@@ -425,6 +442,8 @@ export function ArticleEditor({
         enabled={enabled && !busy && !blocked && !dirty}
         onMedia={setMedia}
         onCategories={setCategories}
+        featuredImageId={doc.featured_image_id}
+        onFeaturedImage={(image) => change({ ...current.current, featured_image_id: image.id, featured_alt: image.alt })}
       />
       <details className="admin-details">
         <summary>Scheduling and article actions</summary>
