@@ -94,3 +94,32 @@ test("activation APIs reject cross-origin, missing sessions, invalid credentials
   expect(invalid.status()).toBe(401);
   expect(await invalid.text()).not.toContain("synthetic-invalid-refresh");
 });
+
+test("real native activation and login forms preserve Origin without weakening CSRF rejection", async ({page, request, baseURL}) => {
+  for (const [path, endpoint, fields] of [
+    ["/admin/blog/activate", "/api/blog/activate", {password: "synthetic-long-password", confirmation: "synthetic-long-password"}],
+    ["/admin/blog/login", "/api/blog/auth", {email: "invalid-local-fixture@example.test", password: "synthetic-long-password"}],
+  ] as const) {
+    const response = await page.goto(path);
+    expect(response?.headers()["referrer-policy"]).toBe("same-origin");
+    const submission = page.waitForRequest(r => r.method() === "POST" && r.url() === `${baseURL}${endpoint}`);
+    // Submit the same native form mechanism with fixture fields and no logged-in
+    // account. Let it reach the real route: do not mock/bypass its origin check.
+    await page.evaluate(({endpoint, fields}) => {
+      const form = document.createElement("form"); form.method = "POST"; form.action = endpoint;
+      for (const [name, value] of Object.entries(fields)) {
+        const input = document.createElement("input"); input.name = name; input.value = value; form.append(input);
+      }
+      document.body.append(form); form.submit();
+    }, {endpoint, fields});
+    expect((await (await submission).allHeaders()).origin).toBe(baseURL);
+    await page.waitForURL(path === "/admin/blog/login" ? "**/admin/blog/login?error=access" : "**/admin/blog/activate?error=activation");
+    const rejected = await request.post(endpoint, {headers:{origin:"null"}, form:fields});
+    expect(rejected.status()).toBe(403);
+  }
+  await page.goto("/admin/blog/activate");
+  await page.route("https://external.invalid/referrer-probe", route => route.fulfill({body:"Synthetic external navigation."}));
+  const external = page.waitForRequest("https://external.invalid/referrer-probe");
+  await page.evaluate(() => { window.location.href = "https://external.invalid/referrer-probe"; });
+  expect((await (await external).allHeaders()).referer).toBeUndefined();
+});
