@@ -16,6 +16,8 @@ import {
 import { blogRequest } from "./client-api";
 import { LibraryManager } from "./library-manager";
 import { titleSlug } from "@/lib/blog/presentation";
+import { normalizeImportedBody } from "@/lib/blog/import-format";
+import { isReviewOnlyArticle } from "@/config/blog-review";
 const RichEditor = dynamic(() => import("./rich-editor"), {
   ssr: false,
   loading: () => <p>Loading article editor…</p>,
@@ -33,11 +35,19 @@ export function ArticleEditor({
   enabled: boolean;
   scheduling: boolean;
 }) {
-  const [doc, setDoc] = useState(article.document),
+  const [doc, setDoc] = useState(() => ({
+      ...article.document,
+      body: normalizeImportedBody(article.document.body),
+    })),
     [post, setPost] = useState(article),
     [media, setMedia] = useState(initialMedia),
     [categories, setCategories] = useState(initialCategories),
-    [message, setMessage] = useState("All changes saved."),
+    [message, setMessage] = useState(() =>
+      JSON.stringify(normalizeImportedBody(article.document.body)) ===
+      JSON.stringify(article.document.body)
+        ? "All changes saved."
+        : "Imported formatting prepared. Save draft to keep these changes.",
+    ),
     [busy, setBusy] = useState(false),
     [locked, setLocked] = useState(false),
     [dirty, setDirty] = useState(false),
@@ -46,7 +56,7 @@ export function ArticleEditor({
     [at, setAt] = useState("");
   const current = useRef(doc),
     version = useRef(article.version),
-    saved = useRef(JSON.stringify(doc)),
+    saved = useRef(JSON.stringify(article.document)),
     queue = useRef<Promise<unknown>>(Promise.resolve()),
     conflict = useRef(false),
     mounted = useRef(true);
@@ -239,10 +249,17 @@ export function ArticleEditor({
         value={doc[key] || ""}
         onChange={(e) => {
           const id = e.target.value || null;
-          const altKey = key === "featured_image_id" ? "featured_alt" : "social_alt";
+          const altKey =
+            key === "featured_image_id" ? "featured_alt" : "social_alt";
           const selected = media.find((image) => image.id === id);
-          change({ ...current.current, [key]: id,
-            [altKey]: !id ? "" : id === current.current[key] ? current.current[altKey] : selected?.alt || current.current[altKey],
+          change({
+            ...current.current,
+            [key]: id,
+            [altKey]: !id
+              ? ""
+              : id === current.current[key]
+                ? current.current[altKey]
+                : selected?.alt || current.current[altKey],
           });
         }}
       >
@@ -274,6 +291,13 @@ export function ArticleEditor({
         Status: {post.status} · Revision {post.version} · {wordCount(doc.body)}{" "}
         words
       </p>
+      {isReviewOnlyArticle(article.id) && (
+        <p className="blog-notice">
+          Private design review: this test article is held out of public website
+          listings, routes and sitemaps. Use Save draft and Preview. Release
+          requires owner approval.
+        </p>
+      )}
       {post.published_at && (
         <p>First published: {new Date(post.published_at).toLocaleString()}</p>
       )}
@@ -339,14 +363,37 @@ export function ArticleEditor({
           </div>
           {imageSelect("featured_image_id", "Featured image")}
           {field("featured_alt", "Featured image alt text", 300)}
-          <div className="admin-wide admin-featured-preview" aria-label="Featured image preview">
-            {doc.featured_image_id ? <>
-              <Image src={mediaUrl(doc.featured_image_id)} alt={doc.featured_alt || "Selected article image"}
-                width={media.find((image) => image.id === doc.featured_image_id)?.width || 800}
-                height={media.find((image) => image.id === doc.featured_image_id)?.height || 450}
-                unoptimized />
-              <p>This image appears on the blog card and at the top of the article after you publish the update.</p>
-            </> : <p className="blog-notice">No main image selected. Uploading adds an image to your library. Choose it under Featured image above, or tap Use as featured image beside its thumbnail below, then publish the update.</p>}
+          <div
+            className="admin-wide admin-featured-preview"
+            aria-label="Featured image preview"
+          >
+            {doc.featured_image_id ? (
+              <>
+                <Image
+                  src={mediaUrl(doc.featured_image_id)}
+                  alt={doc.featured_alt || "Selected article image"}
+                  width={
+                    media.find((image) => image.id === doc.featured_image_id)
+                      ?.width || 800
+                  }
+                  height={
+                    media.find((image) => image.id === doc.featured_image_id)
+                      ?.height || 450
+                  }
+                  unoptimized
+                />
+                <p>
+                  This image appears on the blog card and at the top of the
+                  article after you publish the update.
+                </p>
+              </>
+            ) : (
+              <p className="blog-notice">
+                No main image selected. Uploading adds an image to your library.
+                Choose it under Featured image above, or tap Use as featured
+                image beside its thumbnail below, then publish the update.
+              </p>
+            )}
           </div>
         </div>
         <label className="admin-checkbox">
@@ -370,6 +417,12 @@ export function ArticleEditor({
           disabled={!enabled || locked || blocked}
           onChange={(body) => change({ ...current.current, body })}
           media={media}
+          onMediaCreated={(image) =>
+            setMedia((items) => [
+              image,
+              ...items.filter((item) => item.id !== image.id),
+            ])
+          }
         />
         <details className="admin-details">
           <summary>Search and sharing settings</summary>
@@ -443,7 +496,13 @@ export function ArticleEditor({
         onMedia={setMedia}
         onCategories={setCategories}
         featuredImageId={doc.featured_image_id}
-        onFeaturedImage={(image) => change({ ...current.current, featured_image_id: image.id, featured_alt: image.alt })}
+        onFeaturedImage={(image) =>
+          change({
+            ...current.current,
+            featured_image_id: image.id,
+            featured_alt: image.alt,
+          })
+        }
       />
       <details className="admin-details">
         <summary>Scheduling and article actions</summary>
@@ -468,7 +527,14 @@ export function ArticleEditor({
         </label>
         <div className="admin-actions">
           <button
-            disabled={!enabled || !scheduling || !at || busy || blocked}
+            disabled={
+              !enabled ||
+              !scheduling ||
+              !at ||
+              busy ||
+              blocked ||
+              isReviewOnlyArticle(article.id)
+            }
             className="button button-secondary"
             onClick={() => void run("schedule")}
           >
@@ -548,7 +614,9 @@ export function ArticleEditor({
             Preview
           </button>
           <button
-            disabled={!enabled || busy || blocked}
+            disabled={
+              !enabled || busy || blocked || isReviewOnlyArticle(article.id)
+            }
             className="button button-primary"
             onClick={() => {
               if (confirm("Publish the latest saved article publicly?"))

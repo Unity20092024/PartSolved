@@ -1,4 +1,5 @@
 import "./blog.css";
+import "./editorial.css";
 export default function BlogLayout({
   children,
 }: {

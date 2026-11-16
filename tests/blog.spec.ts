@@ -61,6 +61,7 @@ async function editor(page: Page, conflict = false, delaySave = 0) {
           [
             "src/app/globals.css",
             "src/app/blog/blog.css",
+            "src/app/blog/editorial.css",
             "src/app/admin/blog/admin.css",
           ].map((p) => readFile(p, "utf8")),
         )
@@ -162,7 +163,9 @@ test("SEO routes use www and do not expose drafts or administrative content", as
   await expect(
     // Anonymous visitors reach sign-in once Supabase is connected; otherwise
     // they see setup guidance. Neither state exposes the dashboard or drafts.
-    page.getByRole("heading", { name: /^(Blog setup required|Administrator sign in)$/ }),
+    page.getByRole("heading", {
+      name: /^(Blog setup required|Administrator sign in)$/,
+    }),
   ).toBeVisible();
   for (const route of [
     "/api/blog/posts",
@@ -368,20 +371,38 @@ test("image management validates uploads and connects the selected image to the 
   await expect(
     page.getByRole("combobox", { name: "Featured image", exact: true }),
   ).toHaveValue(mediaId);
-  await expect(page.getByLabel("Featured image alt text", { exact: true })).toHaveValue("A window sash lock");
-  await expect(page.getByLabel("Featured image preview").getByRole("img")).toHaveAttribute("src", `/blog/media/${mediaId}`);
-  await expect.poll(() => state.article().document.featured_image_id).toBe(mediaId);
+  await expect(
+    page.getByLabel("Featured image alt text", { exact: true }),
+  ).toHaveValue("A window sash lock");
+  await expect(
+    page.getByLabel("Featured image preview").getByRole("img"),
+  ).toHaveAttribute("src", `/blog/media/${mediaId}`);
+  await expect
+    .poll(() => state.article().document.featured_image_id)
+    .toBe(mediaId);
   expect(state.article().document.featured_alt).toBe("A window sash lock");
-  await page.getByLabel("Article title", {exact:true}).fill("Local featured-image test");
-  await page.getByRole("button", {name:"Publish", exact:true}).click();
+  await page
+    .getByLabel("Article title", { exact: true })
+    .fill("Local featured-image test");
+  await page.getByRole("button", { name: "Publish", exact: true }).click();
   await expect.poll(() => state.article().status).toBe("published");
   expect(state.article().document.featured_image_id).toBe(mediaId);
   // The dropdown remains functional and clears stale image alt text when removed.
-  await page.getByRole("combobox", {name:"Featured image",exact:true}).selectOption("");
-  await expect(page.getByLabel("Featured image alt text",{exact:true})).toHaveValue("");
-  await expect.poll(() => state.article().document.featured_image_id).toBeNull();
-  await page.getByRole("combobox", {name:"Featured image",exact:true}).selectOption(mediaId);
-  await expect(page.getByLabel("Featured image alt text",{exact:true})).toHaveValue("A window sash lock");
+  await page
+    .getByRole("combobox", { name: "Featured image", exact: true })
+    .selectOption("");
+  await expect(
+    page.getByLabel("Featured image alt text", { exact: true }),
+  ).toHaveValue("");
+  await expect
+    .poll(() => state.article().document.featured_image_id)
+    .toBeNull();
+  await page
+    .getByRole("combobox", { name: "Featured image", exact: true })
+    .selectOption(mediaId);
+  await expect(
+    page.getByLabel("Featured image alt text", { exact: true }),
+  ).toHaveValue("A window sash lock");
 });
 test("duplicate and confirmed deletion use meaningful article actions", async ({
   page,

@@ -1,7 +1,12 @@
 import { Fragment, type ReactNode } from "react";
-import { cleanBody, safeLink, type RichNode } from "@/lib/blog/content";
+import {
+  cleanBody,
+  safeLink,
+  plainText,
+  type RichNode,
+} from "@/lib/blog/content";
+import { normalizeImportedBody } from "@/lib/blog/import-format";
 import { BlogImage } from "./blog-image";
-// Explicit React elements escape text and attributes. Never render stored HTML.
 export function RichContent({
   body,
   preview = false,
@@ -9,6 +14,7 @@ export function RichContent({
   body: RichNode;
   preview?: boolean;
 }) {
+  let heading = 0;
   const render = (node: RichNode, index: number): ReactNode => {
     const children = node.content?.map(render);
     switch (node.type) {
@@ -34,17 +40,27 @@ export function RichContent({
           </Fragment>
         );
       case "paragraph":
-        return <p key={index}>{children}</p>;
-      case "heading":
+        return node.content?.length ? <p key={index}>{children}</p> : null;
+      case "heading": {
+        const id = `article-section-${++heading}`;
         return node.attrs?.level === 3 ? (
-          <h3 key={index}>{children}</h3>
+          <h3 id={id} key={index}>
+            {children}
+          </h3>
         ) : (
-          <h2 key={index}>{children}</h2>
+          <h2 id={id} key={index}>
+            {children}
+          </h2>
         );
+      }
       case "bulletList":
         return <ul key={index}>{children}</ul>;
       case "orderedList":
-        return <ol key={index}>{children}</ol>;
+        return (
+          <ol key={index} start={Number(node.attrs?.start) || 1}>
+            {children}
+          </ol>
+        );
       case "listItem":
         return <li key={index}>{children}</li>;
       case "blockquote":
@@ -53,18 +69,42 @@ export function RichContent({
         return <br key={index} />;
       case "horizontalRule":
         return <hr key={index} />;
+      case "affiliateButton":
+        return (
+          <aside
+            key={index}
+            className="article-affiliate"
+            aria-label="Affiliate product link"
+          >
+            <span>Affiliate link · Retailer website</span>
+            <a
+              href={String(node.attrs?.href)}
+              rel="sponsored nofollow noopener noreferrer"
+            >
+              {String(node.attrs?.label)} <span aria-hidden="true">↗</span>
+            </a>
+            <p>
+              Check current product details and options on the retailer’s
+              website.
+            </p>
+          </aside>
+        );
       case "image":
         return (
-          <BlogImage
-            key={index}
-            id={String(node.attrs?.mediaId)}
-            alt={String(node.attrs?.alt || "")}
-            preview={preview}
-            className="blog-inline-image"
-          />
+          <figure key={index} className="article-figure">
+            <BlogImage
+              id={String(node.attrs?.mediaId)}
+              alt={String(node.attrs?.alt || "")}
+              preview={preview}
+              className="blog-inline-image"
+            />
+            {node.attrs?.caption && (
+              <figcaption>{String(node.attrs.caption)}</figcaption>
+            )}
+          </figure>
         );
       case "table":
-        return (
+        return plainText(node) ? (
           <div
             key={index}
             className="blog-table"
@@ -76,7 +116,7 @@ export function RichContent({
               <tbody>{children}</tbody>
             </table>
           </div>
-        );
+        ) : null;
       case "tableRow":
         return <tr key={index}>{children}</tr>;
       case "tableHeader":
@@ -103,5 +143,10 @@ export function RichContent({
         return null;
     }
   };
-  return <div className="blog-prose">{render(cleanBody(body), 0)}</div>;
+  // Structured allowlist conversion only; stored/pasted HTML is never injected.
+  return (
+    <div className="blog-prose article-prose">
+      {render(cleanBody(normalizeImportedBody(body)), 0)}
+    </div>
+  );
 }

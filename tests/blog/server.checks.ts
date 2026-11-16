@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
 import {
   cleanBody,
+  plainText,
   cleanDocument,
   emptyArticle,
   safeLink,
@@ -23,59 +24,149 @@ import {
   articleCategoryLabel,
 } from "@/lib/blog/presentation";
 import { normalizeArticleImage } from "@/lib/blog/images";
-import { passwordInput, acceptInvitation, setAdministratorPassword } from "@/lib/blog/activation";
-import { invitationFragment, invitationConfirmationUrl, isInvitationLanding } from "@/lib/blog/invitation";
+import {
+  passwordInput,
+  acceptInvitation,
+  setAdministratorPassword,
+} from "@/lib/blog/activation";
+import {
+  invitationFragment,
+  invitationConfirmationUrl,
+  isInvitationLanding,
+} from "@/lib/blog/invitation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 test("default invitation parsing restricts the project and redirect; fragments never become trusted roles", () => {
-  const project = "https://apaojqpgsvikagwlfgci.supabase.co", callback = "https://preview.example/admin/blog/activate";
+  const project = "https://apaojqpgsvikagwlfgci.supabase.co",
+    callback = "https://preview.example/admin/blog/activate";
   const original = `${project}/auth/v1/verify?token=${"a".repeat(64)}&type=invite&redirect_to=https://attacker.invalid/`;
-  const target = new URL(invitationConfirmationUrl(original, project, callback));
+  const target = new URL(
+    invitationConfirmationUrl(original, project, callback),
+  );
   assert.equal(target.origin, project);
   assert.equal(target.searchParams.get("redirect_to"), callback);
-  for (const invalid of [original.replace(project, "https://attacker.invalid"), original.replace("https:", "http:"), original.replace("type=invite", "type=signup"), original.replace("/auth/v1/verify", "/other")])
+  for (const invalid of [
+    original.replace(project, "https://attacker.invalid"),
+    original.replace("https:", "http:"),
+    original.replace("type=invite", "type=signup"),
+    original.replace("/auth/v1/verify", "/other"),
+  ])
     assert.throws(() => invitationConfirmationUrl(invalid, project, callback));
-  assert.deepEqual(invitationFragment("#access_token=untrusted&refresh_token=test-refresh-credential&type=invite&role=admin"), {refresh_token: "test-refresh-credential"});
-  assert.throws(() => invitationFragment("#access_token=x&refresh_token=test-refresh-credential&type=signup"));
-  assert.throws(() => invitationFragment("#error=access_denied&error_code=otp_expired"), /expired/);
+  assert.deepEqual(
+    invitationFragment(
+      "#access_token=untrusted&refresh_token=test-refresh-credential&type=invite&role=admin",
+    ),
+    { refresh_token: "test-refresh-credential" },
+  );
+  assert.throws(() =>
+    invitationFragment(
+      "#access_token=x&refresh_token=test-refresh-credential&type=signup",
+    ),
+  );
+  assert.throws(
+    () => invitationFragment("#error=access_denied&error_code=otp_expired"),
+    /expired/,
+  );
   assert.equal(isInvitationLanding("#access_token=untrusted"), true);
   assert.equal(isInvitationLanding("#measurements"), false);
 });
 test("invitation acceptance and password setting independently verify the user and membership", async () => {
-  const form = new URLSearchParams({password: "long-test-password", confirmation: "long-test-password"});
+  const form = new URLSearchParams({
+    password: "long-test-password",
+    confirmation: "long-test-password",
+  });
   assert.equal(passwordInput(form), "long-test-password");
-  assert.throws(() => passwordInput(new URLSearchParams({password: "short", confirmation: "short"})));
+  assert.throws(() =>
+    passwordInput(
+      new URLSearchParams({ password: "short", confirmation: "short" }),
+    ),
+  );
   const calls: string[] = [];
-  let allowed = false, expired = false, userInvalid = false, deniedPassword = false;
-  const user = {id: "invited-user", email: "owner@example.test", invited_at: "2026-11-13", email_confirmed_at: "2026-11-13"};
-  const session = {access_token: "synthetic-access", refresh_token: "synthetic-refresh", user};
+  let allowed = false,
+    expired = false,
+    userInvalid = false,
+    deniedPassword = false;
+  const user = {
+    id: "invited-user",
+    email: "owner@example.test",
+    invited_at: "2026-11-13",
+    email_confirmed_at: "2026-11-13",
+  };
+  const session = {
+    access_token: "synthetic-access",
+    refresh_token: "synthetic-refresh",
+    user,
+  };
   const client = {
     auth: {
-      refreshSession: async () => { calls.push("refresh"); return {data: {session: expired ? null : session}, error: expired ? new Error("expired") : null}; },
-      getUser: async () => { calls.push("verify"); return {data: {user: userInvalid ? {...user, invited_at: null} : user}, error: null}; },
-      updateUser: async () => { calls.push("password"); return {error: deniedPassword ? new Error("policy") : null}; },
-      signOut: async () => { calls.push("logout"); return {error: null}; },
+      refreshSession: async () => {
+        calls.push("refresh");
+        return {
+          data: { session: expired ? null : session },
+          error: expired ? new Error("expired") : null,
+        };
+      },
+      getUser: async () => {
+        calls.push("verify");
+        return {
+          data: { user: userInvalid ? { ...user, invited_at: null } : user },
+          error: null,
+        };
+      },
+      updateUser: async () => {
+        calls.push("password");
+        return { error: deniedPassword ? new Error("policy") : null };
+      },
+      signOut: async () => {
+        calls.push("logout");
+        return { error: null };
+      },
     },
-    rpc: async (name: string) => { assert.equal(name, "blog_is_admin"); calls.push("membership"); return {data: allowed, error: null}; },
+    rpc: async (name: string) => {
+      assert.equal(name, "blog_is_admin");
+      calls.push("membership");
+      return { data: allowed, error: null };
+    },
   } as unknown as SupabaseClient;
   const pending = await acceptInvitation(client, "synthetic-refresh");
   assert.equal(pending.allowed, false);
   assert.deepEqual(calls, ["refresh", "verify", "membership"]);
   calls.length = 0;
-  await assert.rejects(setAdministratorPassword(client, passwordInput(form)), /administrator membership/);
+  await assert.rejects(
+    setAdministratorPassword(client, passwordInput(form)),
+    /administrator membership/,
+  );
   assert(!calls.includes("password"));
-  allowed = true; calls.length = 0;
+  allowed = true;
+  calls.length = 0;
   await setAdministratorPassword(client, passwordInput(form));
   assert.deepEqual(calls, ["verify", "membership", "password", "logout"]);
-  allowed = false; calls.length = 0;
-  await assert.rejects(setAdministratorPassword(client, passwordInput(form)), /administrator membership/);
+  allowed = false;
+  calls.length = 0;
+  await assert.rejects(
+    setAdministratorPassword(client, passwordInput(form)),
+    /administrator membership/,
+  );
   assert(!calls.includes("password"));
   expired = true;
-  await assert.rejects(acceptInvitation(client, "synthetic-refresh"), /expired/);
-  expired = false; userInvalid = true;
-  await assert.rejects(acceptInvitation(client, "synthetic-refresh"), /owner-invited/);
-  userInvalid = false; allowed = true; deniedPassword = true; calls.length = 0;
-  await assert.rejects(setAdministratorPassword(client, passwordInput(form)), /password could not be set/);
+  await assert.rejects(
+    acceptInvitation(client, "synthetic-refresh"),
+    /expired/,
+  );
+  expired = false;
+  userInvalid = true;
+  await assert.rejects(
+    acceptInvitation(client, "synthetic-refresh"),
+    /owner-invited/,
+  );
+  userInvalid = false;
+  allowed = true;
+  deniedPassword = true;
+  calls.length = 0;
+  await assert.rejects(
+    setAdministratorPassword(client, passwordInput(form)),
+    /password could not be set/,
+  );
   assert(!calls.includes("logout"));
 });
 test("image normalization independently enforces formats, dimensions, byte limits and metadata removal", async () => {
@@ -598,3 +689,149 @@ test(
     }
   },
 );
+
+test("imported article formatting becomes safe structured content with captions and affiliate links", async () => {
+  const { isReviewOnlyArticle, BLOG_REVIEW_HOLD_IDS } =
+    await import("@/config/blog-review");
+  assert.equal(
+    isReviewOnlyArticle(BLOG_REVIEW_HOLD_IDS[0].toUpperCase()),
+    true,
+  );
+  assert.equal(
+    isReviewOnlyArticle("db000000-0000-4000-8000-000000000001"),
+    false,
+  );
+  const { importArticleText, normalizeImportedBody, hasImportedSyntax } =
+    await import("@/lib/blog/import-format");
+  const body = importArticleText(
+    '## A heading\n\n**Bold** and <em>italic</em>. [Retailer](https://example.com/item)\n\n- First\n- Second\n\n1. One\n2. Two\n\n> A quote\n\n| Part | Check |\n| --- | --- |\n| Lock | Spacing |\n\n<script>alert(1)</script><img src="https://attacker.test/pixel"><a href="javascript:alert(1)">Unsafe</a>',
+  );
+  const encoded = JSON.stringify(body);
+  for (const type of [
+    "heading",
+    "bold",
+    "italic",
+    "link",
+    "bulletList",
+    "orderedList",
+    "blockquote",
+    "table",
+  ])
+    assert.match(encoded, new RegExp('"' + type + '"'));
+  assert.doesNotMatch(encoded, /javascript:|attacker\.test|alert\(1\)/);
+  assert.deepEqual(normalizeImportedBody(body), body);
+  const brokenLines = normalizeImportedBody({
+    type: "doc",
+    content: [
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: "Introduction" },
+          { type: "hardBreak" },
+          { type: "text", text: "- A list entry" },
+        ],
+      },
+    ],
+  });
+  assert.match(JSON.stringify(brokenLines), /bulletList/);
+  const mixedMarks = normalizeImportedBody({
+    type: "doc",
+    content: [
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: "Changed", marks: [{ type: "strike" }] },
+          { type: "text", text: " and <b>bold</b>" },
+        ],
+      },
+    ],
+  });
+  assert.match(JSON.stringify(mixedMarks), /strike/);
+  assert.throws(
+    () => importArticleText("<div>".repeat(30) + "deep" + "</div>".repeat(30)),
+    /deeply nested/,
+  );
+  const id = "db000000-0000-4000-8000-000000000003";
+  const image = cleanBody({
+    type: "doc",
+    content: [
+      {
+        type: "image",
+        attrs: {
+          mediaId: id,
+          src: "/blog/media/" + id,
+          alt: "Greenhouse",
+          caption: "A real caption",
+        },
+      },
+    ],
+  });
+  assert.equal(image.content?.[0].attrs?.caption, "A real caption");
+  const pastedFigure = importArticleText(
+    `<figure><img src="/blog/media/${id}" alt="Greenhouse"><figcaption>A real caption</figcaption></figure>`,
+  );
+  assert.equal(pastedFigure.content?.length, 1);
+  assert.equal(pastedFigure.content?.[0].attrs?.caption, "A real caption");
+  const pastedButton = importArticleText(
+    '<aside data-affiliate-button="true"><span>Affiliate link</span><a href="https://example.com/product">Retailer</a></aside>',
+  );
+  assert.equal(pastedButton.content?.[0].type, "affiliateButton");
+  assert.throws(() =>
+    cleanBody({
+      type: "doc",
+      content: [
+        {
+          type: "affiliateButton",
+          attrs: { href: "javascript:alert(1)", label: "Unsafe" },
+        },
+      ],
+    }),
+  );
+  const button = cleanBody({
+    type: "doc",
+    content: [
+      {
+        type: "affiliateButton",
+        attrs: { href: "https://example.com/product", label: "View retailer" },
+      },
+    ],
+  });
+  assert.equal(button.content?.[0].attrs?.label, "View retailer");
+  // The complete owner article can be checked locally without committing private review content.
+  if (process.env.BLOG_REVIEW_ARTICLE_FILE) {
+    const record = JSON.parse(
+      readFileSync(process.env.BLOG_REVIEW_ARTICLE_FILE, "utf8"),
+    );
+    const normalized = normalizeImportedBody(record.document.body);
+    const walk = (node: import("@/lib/blog/content").RichNode) => {
+      if (node.text)
+        assert.equal(
+          hasImportedSyntax(node.text),
+          false,
+          `Unconverted syntax: ${node.text}`,
+        );
+      node.content?.forEach(walk);
+    };
+    walk(normalized);
+    const normalizedText = plainText(normalized).replace(/\s+/g, " ");
+    const verifyWords = (node: import("@/lib/blog/content").RichNode) => {
+      if (node.text) {
+        const expected = plainText(importArticleText(node.text)).replace(
+          /\s+/g,
+          " ",
+        );
+        if (expected)
+          assert.ok(
+            normalizedText.includes(expected),
+            "Imported article words must be preserved",
+          );
+      }
+      node.content?.forEach(verifyWords);
+    };
+    verifyWords(record.document.body);
+    const text = JSON.stringify(normalized);
+    assert.match(text, /Sources checked/);
+    assert.match(text, /Hustle Clan/);
+    assert.deepEqual(normalizeImportedBody(normalized), normalized);
+  }
+});

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { isPreviewDeployment } from "@/config/site";
 import "../../blog/blog.css";
+import "../../blog/editorial.css";
 import "./admin.css";
 export const metadata: Metadata = {
   title: "Blog administration",
