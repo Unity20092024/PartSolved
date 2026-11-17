@@ -9,6 +9,8 @@ import {
 } from "@/lib/blog/server";
 import { uuid, cleanDocument, type Article } from "@/lib/blog/content";
 import { blogFailure, blogResponse, readJson } from "@/lib/blog/http";
+import { normalizeImportedBody } from "@/lib/blog/import-format";
+import { isReviewOnlyArticle } from "@/config/blog-review";
 export async function POST(
   request: Request,
   context: { params: Promise<{ id: string }> },
@@ -23,8 +25,17 @@ export async function POST(
     if (!Number.isSafeInteger(body.version) || Number(body.version) < 1)
       throw new BlogError("Reload the article before editing.", 409);
     const action = body.action;
+    if (
+      isReviewOnlyArticle(id) &&
+      (action === "publish" || action === "schedule")
+    )
+      throw new BlogError(
+        "This test article is held for private design review. Save a draft and use Preview until the owner approves release.",
+        403,
+      );
     if (action === "save") {
       const document = cleanDocument(body.document);
+      document.body = normalizeImportedBody(document.body);
       const { data, error } = await client
         .rpc("blog_save_post", {
           p_id: id,

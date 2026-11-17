@@ -161,6 +161,7 @@ export function cleanBody(value: unknown): RichNode {
       "hardBreak",
       "horizontalRule",
       "image",
+      "affiliateButton",
       "table",
       "tableRow",
       "tableCell",
@@ -216,7 +217,32 @@ export function cleanBody(value: unknown): RichNode {
         mediaId: attrs.mediaId,
         src: mediaUrl(attrs.mediaId),
         alt: attrs.alt.trim(),
+        caption:
+          typeof attrs.caption === "string"
+            ? attrs.caption.slice(0, 1000).trim()
+            : "",
       };
+    }
+    if (node.type === "orderedList") {
+      const attrs = object(node.attrs) ? node.attrs : {};
+      result.attrs = {
+        start: Math.max(1, Math.min(10000, Number(attrs.start) || 1)),
+      };
+    }
+    if (node.type === "affiliateButton") {
+      const attrs = object(node.attrs) ? node.attrs : {};
+      const href = safeLink(attrs.href);
+      if (
+        !href ||
+        href.startsWith("/") ||
+        typeof attrs.label !== "string" ||
+        !attrs.label.trim() ||
+        attrs.label.length > 160
+      )
+        throw new ContentError(
+          "Add a valid external retailer URL and button label.",
+        );
+      result.attrs = { href, label: attrs.label.trim() };
     }
     if (["tableCell", "tableHeader"].includes(node.type)) {
       const attrs = object(node.attrs) ? node.attrs : {};
@@ -228,7 +254,13 @@ export function cleanBody(value: unknown): RichNode {
     if (node.content !== undefined) {
       if (
         !Array.isArray(node.content) ||
-        ["text", "image", "hardBreak", "horizontalRule"].includes(node.type)
+        [
+          "text",
+          "image",
+          "affiliateButton",
+          "hardBreak",
+          "horizontalRule",
+        ].includes(node.type)
       )
         throw new ContentError("Invalid article structure.");
       result.content = node.content.map((child) => clean(child, depth + 1));

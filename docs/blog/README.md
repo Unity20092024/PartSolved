@@ -1,5 +1,7 @@
 # PartSolved publishing
 
+**Editorial update:** see [reader redesign, Android editor instructions and private review limitations](./editorial-review.md).
+
 **Connection follow-up:** the owner has now created the dedicated PartSolved project. See [the current connection status and owner setup steps](./supabase-connection.md). The earlier implementation audit below describes the original unconfigured state; it is not evidence that hosted publishing has passed its release gate.
 
 This feature extends the existing Next.js site. The owner-created PartSolved Supabase project now has the reviewed migrations and private image bucket. Administrator provisioning, the server secret, Auth hardening and hosted publishing verification remain required; see the connection follow-up above. No sample articles, recurring publication job, merge or production deployment are part of this connection work. Public pages work without client JavaScript, and publishing writes default off.

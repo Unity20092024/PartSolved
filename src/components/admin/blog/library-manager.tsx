@@ -13,18 +13,23 @@ export function LibraryManager({
   enabled,
   onMedia,
   onCategories,
+  onFeaturedImage,
+  featuredImageId,
 }: {
   categories: BlogCategory[];
   media: BlogMedia[];
   enabled: boolean;
   onMedia?: (media: BlogMedia[]) => void;
   onCategories?: (categories: BlogCategory[]) => void;
+  onFeaturedImage?: (image: BlogMedia) => void;
+  featuredImageId?: string | null;
 }) {
   const [categories, setCategories] = useState(initialCategories),
-    [media, setMedia] = useState(initialMedia),
+    [localMedia, setMedia] = useState(initialMedia),
     [hasMore, setHasMore] = useState(initialMedia.length === 200),
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false);
+  const media = onMedia ? initialMedia : localMedia;
   const changeMedia = (next: BlogMedia[]) => {
     setMedia(next);
     onMedia?.(next);
@@ -50,7 +55,8 @@ export function LibraryManager({
         id,
       });
       const next = [...categories.filter((c) => c.id !== item.id), item];
-      setCategories(next); onCategories?.(next);
+      setCategories(next);
+      onCategories?.(next);
     });
   };
   return (
@@ -62,7 +68,8 @@ export function LibraryManager({
         <summary>Manage categories</summary>
         <p>
           Changes affect category names and URLs across the blog. Used
-          categories cannot be deleted. Category choices update in this editor immediately.
+          categories cannot be deleted. Category choices update in this editor
+          immediately.
         </p>
         {categories.map((c) => (
           <form key={c.id} onSubmit={(e) => categorySave(e, c.id)}>
@@ -115,7 +122,8 @@ export function LibraryManager({
                           id: c.id,
                         });
                         const next = categories.filter((v) => v.id !== c.id);
-                        setCategories(next); onCategories?.(next);
+                        setCategories(next);
+                        onCategories?.(next);
                       });
                   }}
                 >
@@ -221,6 +229,19 @@ export function LibraryManager({
                 {item.width} × {item.height} · {Math.ceil(item.bytes / 1024)}{" "}
                 KiB
               </p>
+              {onFeaturedImage && item.state === "ready" && (
+                <button
+                  type="button"
+                  className="button button-secondary"
+                  disabled={!enabled || busy}
+                  aria-pressed={featuredImageId === item.id}
+                  onClick={() => onFeaturedImage(item)}
+                >
+                  {featuredImageId === item.id
+                    ? "Featured image selected"
+                    : "Use as featured image"}
+                </button>
+              )}
               <form
                 onSubmit={(event) => {
                   event.preventDefault();

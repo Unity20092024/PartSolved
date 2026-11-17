@@ -7,7 +7,7 @@ export async function proxy(request: NextRequest) {
   if (!url || !key) {
     response.headers.set("Cache-Control", "private, no-store");
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
-    response.headers.set("Referrer-Policy", "no-referrer");
+    response.headers.set("Referrer-Policy", "same-origin");
     return response;
   }
   const client = createServerClient(url, key, {
@@ -43,7 +43,9 @@ export async function proxy(request: NextRequest) {
   }
   response.headers.set("Cache-Control", "private, no-store");
   response.headers.set("X-Robots-Tag", "noindex, nofollow");
-  response.headers.set("Referrer-Policy", "no-referrer");
+  // Native form POSTs use Origin: null under no-referrer. Preserve same-origin
+  // CSRF checks while still withholding referrers from other websites.
+  response.headers.set("Referrer-Policy", "same-origin");
   return response;
 }
 export const config = { matcher: ["/admin/blog/:path*", "/api/blog/:path*"] };

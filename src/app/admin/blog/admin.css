@@ -156,6 +156,15 @@
 .admin-wide {
   grid-column: 1/-1;
 }
+.admin-featured-preview img {
+  width: 100%;
+  max-width: 480px;
+  max-height: 260px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 14px;
+  background: #fff;
+}
 .admin-checkbox {
   display: flex !important;
   align-items: center;
@@ -202,5 +211,223 @@
   }
   .admin-rich-editor {
     padding: 14px;
+  }
+}
+/* Keep the writing tools in reach, including while the mobile keyboard is open. */
+.blog-admin {
+  font-family: Inter, Arial, sans-serif;
+}
+.blog-admin h1,
+.blog-admin h2,
+.blog-admin h3 {
+  font-family: Manrope, Arial, sans-serif;
+}
+.editor-shell {
+  min-width: 0;
+  position: relative;
+}
+.editor-sticky-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  max-width: 100%;
+  background: #f8f9f7;
+  box-shadow: 0 4px 12px #17221a0d;
+  scrollbar-width: thin;
+  scroll-padding: 12px;
+}
+.editor-sticky-toolbar button {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  min-height: 46px;
+}
+.editor-sticky-toolbar button:focus-visible,
+.editor-context-insert button:focus-visible {
+  outline: 3px solid #b3131c;
+  outline-offset: 2px;
+}
+.admin-rich-editor {
+  font-family: Inter, Arial, sans-serif;
+  line-height: 1.8;
+  scroll-margin-top: 100px;
+}
+.admin-rich-editor h2,
+.admin-rich-editor h3 {
+  font-family: Manrope, Arial, sans-serif;
+  line-height: 1.35;
+}
+.admin-rich-editor h2 {
+  font-size: 1.65rem;
+  margin: 30px 0 14px;
+}
+.admin-rich-editor h3 {
+  font-size: 1.25rem;
+  margin: 22px 0 10px;
+}
+.admin-rich-editor p {
+  margin: 0 0 1.2em;
+}
+.admin-rich-editor li p {
+  margin: 0.35em 0;
+}
+.admin-rich-editor ul,
+.admin-rich-editor ol {
+  padding-left: 24px;
+}
+.admin-rich-editor figure {
+  margin: 26px 0;
+  padding: 10px;
+  border: 1px solid #e4e7e1;
+  border-radius: 12px;
+  background: #fafbf9;
+}
+.admin-rich-editor figure img {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+}
+.admin-rich-editor figcaption {
+  font-size: 0.8rem;
+  color: #626b62;
+  line-height: 1.6;
+  padding: 10px 2px 0;
+}
+.admin-rich-editor .ProseMirror-selectednode {
+  outline: 3px solid #b3131c;
+  outline-offset: 3px;
+}
+.admin-rich-editor blockquote {
+  border-left: 3px solid #b3131c;
+  margin: 24px 0;
+  padding: 12px 20px;
+  background: #f6f7f3;
+}
+.admin-rich-editor a {
+  color: #a7111a;
+  text-decoration: underline;
+}
+.editor-context-insert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 18px;
+  user-select: none;
+}
+.editor-context-insert:before,
+.editor-context-insert:after {
+  content: "";
+  height: 1px;
+  background: #e7e9e2;
+  flex: 1;
+}
+.editor-context-insert button {
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  min-height: 44px;
+  padding: 8px 16px;
+  background: #fff;
+  color: #9c1820;
+  font-size: 0.8rem;
+}
+.editor-hint,
+.editor-notice {
+  font-size: 0.8rem;
+  color: #626962;
+  line-height: 1.65;
+}
+.editor-notice {
+  padding: 10px;
+  background: #f4f7f0;
+}
+.editor-dialog {
+  width: min(560px, calc(100vw - 24px));
+  max-height: calc(var(--editor-visible-height, 100dvh) - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #d8ded5;
+  border-radius: 18px;
+  padding: 24px;
+  color: #202820;
+  background: #fff;
+  box-shadow: 0 24px 90px #0003;
+  font-family: Inter, Arial, sans-serif;
+}
+.editor-dialog::backdrop {
+  background: #101a1466;
+}
+.editor-dialog-heading {
+  display: flex;
+  gap: 15px;
+  align-items: start;
+  justify-content: space-between;
+}
+.editor-dialog-heading h2 {
+  font-size: 1.35rem;
+  margin: 0;
+  line-height: 1.35;
+}
+.editor-dialog-heading > button {
+  font-size: 1.6rem;
+  border: 0;
+  background: #f1f3ee;
+  border-radius: 50%;
+  min-width: 44px;
+  min-height: 44px;
+}
+.editor-dialog p {
+  font-size: 0.85rem;
+  line-height: 1.65;
+}
+.editor-dialog label {
+  font-size: 0.88rem;
+}
+.editor-dialog-photo {
+  width: 100%;
+  height: auto;
+  max-height: 180px;
+  object-fit: contain;
+}
+.editor-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.editor-dialog-actions button {
+  border: 1px solid #cdd4c8;
+  background: #fff;
+  border-radius: 8px;
+  min-height: 46px;
+  padding: 10px 18px;
+  font-weight: 650;
+}
+.editor-dialog-actions .editor-primary {
+  background: #b3131c;
+  color: #fff;
+  border-color: #b3131c;
+}
+@media (max-width: 650px) {
+  .admin-savebar {
+    z-index: 20;
+  }
+  .editor-dialog {
+    padding: 19px;
+  }
+  .editor-sticky-toolbar {
+    gap: 5px;
+    padding: 8px;
+  }
+  .admin-savebar .button {
+    font-size: 0.85rem;
+    min-width: 88px;
+    padding: 10px 12px;
+  }
+  .admin-rich-editor {
+    scroll-margin-bottom: 170px;
   }
 }

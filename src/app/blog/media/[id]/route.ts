@@ -4,6 +4,7 @@ import {
   serviceBlogClient,
 } from "@/lib/blog/server";
 import { uuid } from "@/lib/blog/content";
+import { BLOG_REVIEW_HOLD_IDS } from "@/config/blog-review";
 export const runtime = "nodejs";
 export async function GET(
   _request: Request,
@@ -27,6 +28,15 @@ export async function GET(
             .maybeSingle()
         ).data
       : null;
+    if (item && client) {
+      const { data: references } = await client
+        .from("blog_publications")
+        .select("post_id")
+        .contains("media_ids", [id])
+        .not("post_id", "in", `(${BLOG_REVIEW_HOLD_IDS.join(",")})`)
+        .limit(1);
+      if (!references?.length) item = null;
+    }
     if (!item) {
       headers["X-Robots-Tag"] = "noindex";
       const { client: admin } = await requireBlogAdmin();

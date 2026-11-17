@@ -5,6 +5,10 @@ import { cookies } from "next/headers";
 import { cache } from "react";
 import { SITE_ORIGIN } from "@/config/site";
 import type { Article, Publication, BlogCategory, BlogMedia } from "./content";
+import {
+  BLOG_REVIEW_HOLD_IDS,
+  isReviewOnlyArticle,
+} from "@/config/blog-review";
 export class BlogError extends Error {
   constructor(
     message: string,
@@ -153,13 +157,16 @@ export const getPublication = cache(
       .maybeSingle();
     if (error)
       throw new BlogError("Articles are temporarily unavailable.", 503);
-    if (data) return { article: data as Publication, redirect: false };
+    if (data)
+      return isReviewOnlyArticle(data.post_id)
+        ? null
+        : { article: data as Publication, redirect: false };
     const { data: history } = await client
       .from("blog_slug_history")
       .select("post_id")
       .eq("slug", slug)
       .maybeSingle();
-    if (!history) return null;
+    if (!history || isReviewOnlyArticle(history.post_id)) return null;
     const { data: current } = await client
       .from("blog_publications")
       .select("*")
@@ -175,6 +182,7 @@ export async function listPublications(categoryId?: string, page = 1) {
   let query = client
     .from("blog_publications")
     .select("*", { count: "exact" })
+    .not("post_id", "in", `(${BLOG_REVIEW_HOLD_IDS.join(",")})`)
     .order("published_at", { ascending: false })
     .range((page - 1) * 12, page * 12 - 1);
   if (categoryId) query = query.eq("category_id", categoryId);
@@ -202,6 +210,7 @@ export async function featuredPublication(): Promise<Publication | null> {
   const { data, error } = await client
     .from("blog_publications")
     .select("*")
+    .not("post_id", "in", `(${BLOG_REVIEW_HOLD_IDS.join(",")})`)
     .eq("document->>is_featured", "true")
     .order("updated_at", { ascending: false })
     .limit(1)
@@ -221,6 +230,7 @@ export async function sitemapPublications(): Promise<Publication[]> {
     const { data, error } = await client
       .from("blog_publications")
       .select("*")
+      .not("post_id", "in", `(${BLOG_REVIEW_HOLD_IDS.join(",")})`)
       .order("post_id")
       .range(start, start + 999);
     if (error) throw new BlogError("Sitemap publication query failed.", 503);
