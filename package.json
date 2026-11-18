@@ -12,7 +12,9 @@
     "test:ai": "node tests/helpers/build-ai-tests.mjs && node --test test-results/ai/server-tests.cjs",
     "test:blog": "node tests/helpers/build-blog-tests.mjs && node test-results/blog/server-tests.cjs",
     "eval:ai": "node scripts/evaluate-photo-assist.mjs",
-    "test:ai:reviewer": "node tests/helpers/reviewer-smoke.mjs"
+    "test:ai:reviewer": "node tests/helpers/reviewer-smoke.mjs",
+    "test:catalog": "node tests/helpers/build-catalog-tests.mjs && node test-results/catalog/server-tests.cjs",
+    "test:catalog:db": "node tests/catalog/database.mjs"
   },
   "engines": {
     "node": ">=22.0.0"
@@ -33,6 +35,7 @@
     "next": "16.4.5",
     "react": "19.3.1",
     "react-dom": "19.3.1",
+    "read-excel-file": "9.3.17",
     "sharp": "0.35.5"
   },
   "devDependencies": {

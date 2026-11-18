@@ -30,6 +30,12 @@ export default async function CategoryPage({
     <ScaffoldPage title={category.title} description={category.subtitle}>
       <div className="scaffold-card">
         <h2>Our catalog is on the way</h2>
+        <Link
+          href={`/catalog?category=${category.slug}`}
+          className="button button-secondary"
+        >
+          Search catalog records
+        </Link>
         <p>
           Products, availability, and pricing have not been connected yet. Use
           the photo intake to record identification details, or try Guided

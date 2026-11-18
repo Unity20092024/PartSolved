@@ -63,7 +63,7 @@ test("expired and unrelated fragments fail clearly without exposing credentials"
   await expect(page.getByLabel("New password", {exact: true})).toHaveCount(0);
 });
 
-test("Preview helper validates the original Supabase URL and replaces untrusted return addresses", async ({page}) => {
+test("Preview helper validates the original Supabase URL and replaces untrusted return addresses", async ({page, baseURL}) => {
   await page.goto("/admin/blog/activate");
   await page.getByText("Testing in Preview? Open your original invitation here", {exact: true}).click();
   const input = page.getByLabel("Original invitation confirmation link");
@@ -76,7 +76,7 @@ test("Preview helper validates the original Supabase URL and replaces untrusted 
   const verification = page.waitForRequest(request => request.url().startsWith(`${project}/auth/v1/verify?`));
   await page.getByRole("button", {name: "Open invitation in this environment"}).click();
   const url = new URL((await verification).url());
-  expect(url.searchParams.get("redirect_to")).toBe("http://127.0.0.1:3000/admin/blog/activate");
+  expect(url.searchParams.get("redirect_to")).toBe(new URL("/admin/blog/activate", baseURL).href);
 });
 
 test("activation APIs reject cross-origin, missing sessions, invalid credentials, and oversized requests", async ({request, baseURL}) => {

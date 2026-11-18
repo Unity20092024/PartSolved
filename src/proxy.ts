@@ -48,4 +48,11 @@ export async function proxy(request: NextRequest) {
   response.headers.set("Referrer-Policy", "same-origin");
   return response;
 }
-export const config = { matcher: ["/admin/blog/:path*", "/api/blog/:path*"] };
+export const config = {
+  matcher: [
+    "/admin/blog/:path*",
+    "/api/blog/:path*",
+    "/admin/catalog/:path*",
+    "/api/catalog/:path*",
+  ],
+};
