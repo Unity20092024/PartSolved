@@ -61,6 +61,8 @@ No credentials should be posted in chat or committed. The migration adds only ca
 
 ## Verification
 
+See the [test report](./testing.md) and [protected Preview instructions](./preview-review.md).
+
 ```sh
 npm ci
 npm run lint
