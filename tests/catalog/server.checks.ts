@@ -168,6 +168,11 @@ test("XLSX parsing preserves text identifiers and rejects formulas, sparse range
     assert.throws(() =>
       inspectWorkbook(readFileSync("tests/fixtures/catalog/" + file)),
     );
+  const inconsistent = Buffer.from(
+    readFileSync("tests/fixtures/catalog/synthetic-import.xlsx"),
+  );
+  inconsistent.writeUInt16LE(0, 8);
+  assert.throws(() => inspectWorkbook(inconsistent));
   await assert.rejects(spreadsheet(new Uint8Array([1, 2, 3]), "xls"));
   assert.throws(() => inspectWorkbook(Buffer.alloc(4 * 1024 * 1024)));
   const numeric = { ...sheet, numericCells: ["2:6"] };

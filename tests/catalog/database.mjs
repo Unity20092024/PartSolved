@@ -513,6 +513,14 @@ try {
   await client.query(
     "delete from catalog_media;delete from catalog_products;delete from catalog_import_items;delete from catalog_import_batches;delete from catalog_sources;delete from catalog_manufacturers;delete from catalog_suppliers;",
   );
+  await client.query(
+    "update catalog_categories set name='Owner edited taxonomy' where id='window-hardware'",
+  );
+  await assert.rejects(client.query(down));
+  await client.query("rollback");
+  await client.query(
+    "update catalog_categories set name='Window Hardware' where id='window-hardware'",
+  );
   await client.query(down);
   assert.equal(
     (await client.query("select to_regclass('public.catalog_products') as t"))

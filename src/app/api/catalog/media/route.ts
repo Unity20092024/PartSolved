@@ -31,21 +31,19 @@ export async function POST(request: Request) {
     const { data: bytes, info } = await normalizeArticleImage(input);
     const id = randomUUID(),
       path = `${id}.webp`;
-    const { error: insert } = await client
-      .from("catalog_media")
-      .insert({
-        id,
-        product_id: meta.product_id,
-        variant_id: null,
-        kind,
-        alt,
-        rights_reference,
-        attribution,
-        path,
-        width: info.width,
-        height: info.height,
-        bytes: bytes.length,
-      });
+    const { error: insert } = await client.from("catalog_media").insert({
+      id,
+      product_id: meta.product_id,
+      variant_id: null,
+      kind,
+      alt,
+      rights_reference,
+      attribution,
+      path,
+      width: info.width,
+      height: info.height,
+      bytes: bytes.length,
+    });
     catalogDatabaseError(insert);
     const { error: upload } = await client.storage
       .from("catalog-media")
@@ -56,7 +54,7 @@ export async function POST(request: Request) {
         .update({ state: "failed" })
         .eq("id", id);
       throw new CatalogError(
-        "Upload failed. The failed image record is retained for deliberate cleanup; the product is unchanged.",
+        "Upload failed. No image was published. The failed record is retained for deliberate cleanup; reload the product before continuing.",
         503,
       );
     }

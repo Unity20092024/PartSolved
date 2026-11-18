@@ -53,7 +53,9 @@ export function inspectWorkbook(bytes: Buffer) {
       names.has(name) ||
       /\.\.|^\/|\\|vba|externalLinks|embeddings/i.test(name) ||
       local + 30 > bytes.length ||
-      bytes.readUInt32LE(local) !== 0x04034b50
+      bytes.readUInt32LE(local) !== 0x04034b50 ||
+      bytes.readUInt16LE(local + 6) !== flags ||
+      bytes.readUInt16LE(local + 8) !== method
     )
       throw new CatalogError(
         "Encrypted, embedded, oversized or unsafe workbook entries are unsupported.",
