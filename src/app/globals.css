@@ -2172,3 +2172,17 @@ button:disabled {
 .intake-photo-compact .photo-format-hint { display: none; }
 .intake-photo-compact .button { padding: 10px 6px; font-size: 14px; }
 .intake-photo-compact .text-button { min-height: 44px; font-size: 14px; }
+.finder-catalog-entry .button { min-height: 48px; border-radius: 18px; padding: 12px 20px; }
+.finder-candidate-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,270px),1fr)); gap: 18px; }
+.finder-candidate { display: flex; flex-direction: column; overflow-wrap: anywhere; }
+.finder-candidate-image { width: 100%; height: 190px; object-fit: contain; border-radius: 18px; background: #fafafa; margin-bottom: 16px; }
+.finder-no-image { min-height: 110px; display: grid; place-items: center; background: #f4f5f6; border-radius: 18px; padding: 12px; text-align: center; color: #555e68; }
+.finder-candidate-label { color: #b90009; font-weight: 800; }
+.finder-candidate li { margin-block: 9px; }
+.finder-candidate summary { font-weight: 750; min-height: 44px; cursor: pointer; padding-block: 10px; }
+.finder-candidate .button { margin-top: auto; min-height: 48px; border-radius: 18px; padding: 12px; }
+.finder-more { min-height: 48px; padding: 12px 20px; border-radius: 18px; margin-bottom: 20px; }
+.finder-result-actions { display: grid; gap: 10px; }
+.finder-result-actions a { min-height: 44px; display: flex; align-items: center; color: #b90009; text-decoration: underline; }
+.finder-result-actions button, .catalog-measure-question button { min-height: 48px; padding: 12px; border-radius: 18px; }
+.finder-candidate .review-list > div { grid-template-columns: 1fr; gap: 5px; }

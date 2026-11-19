@@ -40,6 +40,8 @@ export interface MeasurementGroup {
   notes: string;
 }
 export interface IntakeDraft {
+  /** Remembers that a written-details catalog lookup was requested; photos remain local. */
+  catalogSearchRequested?: boolean;
   /** Browser-only presentation metadata; not a catalog category or request schema change. */
   finderCategory?: import("@/config/finder-categories").FinderCategory;
   typesByFinderCategory?: Record<string, string>;

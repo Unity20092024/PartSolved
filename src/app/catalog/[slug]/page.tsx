@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { publicCatalogProduct, catalogCollections } from "@/lib/catalog/server";
 import { siteUrl, isPreviewDeployment } from "@/config/site";
+import { FinderReturn } from "@/components/catalog/finder-return";
 import { ProductView } from "@/components/catalog/product-view";
 import { jsonLd } from "@/lib/blog/content";
 export const dynamic = "force-dynamic";
@@ -63,6 +64,7 @@ export default async function ProductPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(structured) }}
       />
+      <FinderReturn />
       <ProductView
         key={`${p.id}:${query.variant || ""}`}
         product={p}
