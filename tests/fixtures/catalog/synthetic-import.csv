@@ -1,0 +1,3 @@
+product_slug,title,description,manufacturer_slug,family_id,variant_key,manufacturer_part_number,alternate_part_number,supplier_slug,supplier_sku,finish,color,handedness,material,measurement_key,measurement_label,measurement_value,measurement_unit,verified_at
+synthetic-import-roller,SYNTHETIC imported roller,Rehearsal data only,synthetic-maker,rollers,test,DEMO-IMPORT-MPN-011,,synthetic-supplier-a,DEMO-IMPORT-A-011,Test finish,,unknown,,screw-spacing,Synthetic spacing,1,in,2026-11-01
+synthetic-import-roller,SYNTHETIC imported roller,Rehearsal data only,synthetic-maker,rollers,test,DEMO-IMPORT-MPN-011,,synthetic-supplier-b,DEMO-IMPORT-B-011,Test finish,,unknown,,screw-spacing,Synthetic spacing,1,in,2026-11-01

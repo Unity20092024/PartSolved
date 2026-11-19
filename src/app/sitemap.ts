@@ -1,3 +1,4 @@
+import { catalogSitemap } from "@/lib/catalog/server";
 import type { MetadataRoute } from "next";
 import { sitemapPublications, publicCategories } from "@/lib/blog/server";
 import { canonicalFor } from "@/lib/blog/content";
@@ -17,14 +18,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/guides/measurements",
     "/support",
   ];
-  const [articles, categories] = await Promise.all([
+  const [articles, categories, products] = await Promise.all([
     sitemapPublications(),
     publicCategories(),
+    catalogSitemap(),
   ]);
   const indexable = articles.filter(
     (p) => canonicalFor(p.document) === siteUrl(`/blog/${p.slug}`),
   );
   return [
+    ...products.map((p) => ({
+      url: siteUrl(`/catalog/${p.slug}`),
+      lastModified: new Date(p.updated_at),
+    })),
     ...paths.map((path) => ({ url: siteUrl(path) })),
     ...(indexable.length ? [{ url: siteUrl("/blog") }] : []),
     ...categories
