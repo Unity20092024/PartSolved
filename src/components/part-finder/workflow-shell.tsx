@@ -53,6 +53,13 @@ export function WorkflowShell({
             <ol className="workflow-progress">
               {steps.map((item, index) => (
                 <li
+                  title={
+                    [
+                      "Step 1 — Photo",
+                      "Step 2 — Tell Us What You Know",
+                      "Step 3 — Review & Continue",
+                    ][index]
+                  }
                   key={item.label}
                   aria-current={index === step ? "step" : undefined}
                   className={

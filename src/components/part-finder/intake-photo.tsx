@@ -3,11 +3,11 @@ import { Camera, RefreshCw, Trash2, Upload } from "lucide-react";
 import { PhotoPreview } from "./photo-preview";
 import { usePhotoSelection } from "./use-photo-selection";
 import { PhotoInputs, PhotoMessages } from "./photo-inputs";
-export function IntakePhoto() {
+export function IntakePhoto({ compact = false }: { compact?: boolean }) {
   const selection = usePhotoSelection();
   return (
     <section
-      className="intake-photo intake-card"
+      className={`intake-photo intake-card${compact ? " intake-photo-compact" : ""}`}
       aria-label="Your photo"
       aria-busy={selection.busy}
     >
@@ -26,7 +26,7 @@ export function IntakePhoto() {
         </div>
       )}
       <div className="intake-photo-controls">
-        <h2>Your Photo</h2>
+        <h2 className={compact ? "sr-only" : undefined}>Your Photo</h2>
         <button
           type="button"
           className="button button-secondary"
@@ -55,7 +55,7 @@ export function IntakePhoto() {
             Remove Photo
           </button>
         )}
-        <p className="field-hint">
+        <p className="field-hint photo-format-hint">
           <Upload size={14} aria-hidden="true" /> JPEG, PNG, WebP · 10 MiB
           maximum. If your camera isn’t available, use upload. Your browser may
           show a file picker.

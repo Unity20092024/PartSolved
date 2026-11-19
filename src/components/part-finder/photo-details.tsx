@@ -1,34 +1,45 @@
 "use client";
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  ArrowRight,
-  DoorOpen,
-  PanelsTopLeft,
-  CircleHelp,
-  Settings,
-  Columns3,
-} from "lucide-react";
+import { ArrowRight, DoorOpen, PanelsTopLeft, CircleHelp } from "lucide-react";
 import { usePhoto } from "./photo-provider";
 import { IntakePhoto } from "./intake-photo";
 import { PhotoRecovery } from "./photo-recovery";
 import { WorkflowShell } from "./workflow-shell";
 import { MeasurementFields } from "./measurement-fields";
+import { getPartType } from "@/config/part-types";
 import {
-  availablePartTypes,
-  getPartType,
-  hardwareCategories,
-} from "@/config/part-types";
+  finderCategories,
+  finderCategory,
+  finderPartTypes,
+  chooseFinderCategory,
+  chooseFinderType,
+} from "@/config/finder-categories";
 import { emptyMeasurements, selectedType, validateDraft } from "@/lib/intake";
-import type { HardwareCategory } from "@/types/intake";
-const icons = [PanelsTopLeft, Columns3, DoorOpen, Settings, CircleHelp];
+const icons = [PanelsTopLeft, DoorOpen, DoorOpen, CircleHelp];
 export function PhotoDetails() {
   const { photo, draft, setDraft, photoBusy } = usePhoto();
   const router = useRouter();
   const [attempted, setAttempted] = useState(false);
   const errors = attempted ? validateDraft(draft) : {};
   const summary = useRef<HTMLDivElement>(null);
+  const measurementSection = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const reveal = () => {
+      if (window.location.hash === "#measurements-title") {
+        const section = document.querySelector<HTMLDetailsElement>(
+          "details[name=measurements]",
+        );
+        if (section) section.open = true;
+        document.getElementById("measurements-title")?.focus();
+      }
+    };
+    reveal();
+    window.addEventListener("hashchange", reveal);
+    return () => window.removeEventListener("hashchange", reveal);
+  }, []);
+  const customerCategory = finderCategory(draft);
   const type = selectedType(draft),
     definition = getPartType(type),
     group = draft.measurementsByType[type] ?? emptyMeasurements();
@@ -39,6 +50,13 @@ export function PhotoDetails() {
     const found = validateDraft(draft);
     setAttempted(true);
     if (Object.keys(found).length) {
+      if (
+        Object.keys(found).some(
+          (id) => !["category", "partType"].includes(id),
+        ) &&
+        measurementSection.current
+      )
+        measurementSection.current.open = true;
       requestAnimationFrame(() => summary.current?.focus());
       return;
     }
@@ -46,8 +64,8 @@ export function PhotoDetails() {
   }
   return (
     <WorkflowShell
-      title="Add Details"
-      description="Tell us about your part to prepare its identification information. Not Sure is always an option."
+      title="Tell Us What You Know"
+      description="Choose what looks closest. Not Sure is always an option."
       step={1}
       completedSteps={photo ? [0] : []}
       optionalPhoto={draft.source === "guided"}
@@ -63,7 +81,7 @@ export function PhotoDetails() {
               available, or continue with your answers.
             </p>
           )}
-          <IntakePhoto />
+          <IntakePhoto compact />
           <div
             ref={summary}
             tabIndex={-1}
@@ -100,18 +118,18 @@ export function PhotoDetails() {
             aria-describedby={errors.category ? "category-error" : undefined}
           >
             <legend>
-              Hardware Category{" "}
+              What is it for?{" "}
               <span className="required-mark" aria-hidden="true">
                 *
               </span>
               <span className="sr-only"> required</span>
             </legend>
             <div className="category-choices">
-              {hardwareCategories.map((category, index) => {
+              {finderCategories.map((category, index) => {
                 const Icon = icons[index];
                 return (
                   <label
-                    className={`choice-card ${draft.category === category.id ? "selected" : ""}`}
+                    className={`choice-card ${customerCategory === category.id ? "selected" : ""}`}
                     key={category.id}
                   >
                     <input
@@ -119,12 +137,11 @@ export function PhotoDetails() {
                       required
                       name="category"
                       value={category.id}
-                      checked={draft.category === category.id}
+                      checked={customerCategory === category.id}
                       onChange={() =>
-                        setDraft((previous) => ({
-                          ...previous,
-                          category: category.id as HardwareCategory,
-                        }))
+                        setDraft((previous) =>
+                          chooseFinderCategory(previous, category.id),
+                        )
                       }
                     />
                     <Icon size={25} aria-hidden="true" />
@@ -155,13 +172,9 @@ export function PhotoDetails() {
               aria-invalid={!!errors.partType}
               aria-describedby={errors.partType ? "part-type-error" : undefined}
               onChange={(event) =>
-                setDraft((previous) => ({
-                  ...previous,
-                  typesByCategory: {
-                    ...previous.typesByCategory,
-                    [previous.category]: event.target.value,
-                  },
-                }))
+                setDraft((previous) =>
+                  chooseFinderType(previous, event.target.value),
+                )
               }
             >
               <option value="">
@@ -169,7 +182,7 @@ export function PhotoDetails() {
                   ? "Select a part type"
                   : "Select a category first"}
               </option>
-              {availablePartTypes(draft.category).map((part) => (
+              {finderPartTypes(customerCategory).map((part) => (
                 <option key={part.id} value={part.id}>
                   {part.label}
                 </option>
@@ -186,26 +199,28 @@ export function PhotoDetails() {
               <p className="field-hint">{definition.description}</p>
             )}
           </div>
-          <MeasurementFields
-            enabled={!!type}
-            key={type}
-            definition={definition}
-            group={group}
-            errors={errors}
-            onChange={(next) =>
-              setDraft((previous) => ({
-                ...previous,
-                measurementsByType: {
-                  ...previous.measurementsByType,
-                  [type]: next,
-                },
-              }))
-            }
-          />
+
           <section className="form-section" aria-labelledby="additional-title">
             <h2 id="additional-title" tabIndex={-1}>
-              Additional Details <span className="optional">(optional)</span>
+              A little more information{" "}
+              <span className="optional">(optional)</span>
             </h2>
+            <label className="field-label" htmlFor="problem">
+              Description of the problem
+            </label>
+            <textarea
+              id="problem"
+              rows={3}
+              maxLength={1500}
+              value={draft.problem}
+              onChange={(event) =>
+                setDraft((previous) => ({
+                  ...previous,
+                  problem: event.target.value,
+                }))
+              }
+              placeholder="What is broken or not working? Include which side you viewed."
+            />
             <div className="details-fields">
               {(
                 [
@@ -220,12 +235,6 @@ export function PhotoDetails() {
                     label: "Part Number / Markings",
                     placeholder: "Copy stamped numbers or letters exactly",
                     max: 200,
-                  },
-                  {
-                    id: "finish",
-                    label: "Color / Finish",
-                    placeholder: "Describe the color or finish",
-                    max: 100,
                   },
                 ] as const
               ).map((field) => (
@@ -248,56 +257,84 @@ export function PhotoDetails() {
                 </div>
               ))}
             </div>
-            {definition?.orientation && (
-              <fieldset className="orientation-fieldset">
-                <legend>Orientation</legend>
-                <div className="inline-options">
-                  {(["left", "right", "not-sure"] as const).map((value) => (
-                    <label key={value}>
-                      <input
-                        type="radio"
-                        name="orientation"
-                        checked={draft.orientation === value}
-                        onChange={() =>
-                          setDraft((previous) => ({
-                            ...previous,
-                            orientation: value,
-                          }))
-                        }
-                      />
-                      {value === "not-sure"
-                        ? "Not Sure"
-                        : value === "left"
-                          ? "Left"
-                          : "Right"}
-                    </label>
-                  ))}
-                </div>
-                <Link
-                  className="measurement-help"
-                  href="/guides/measurements#orientation"
-                >
-                  How to record orientation
-                </Link>
-              </fieldset>
-            )}
-            <label className="field-label" htmlFor="problem">
-              Description of the problem
-            </label>
-            <textarea
-              id="problem"
-              rows={3}
-              maxLength={1500}
-              value={draft.problem}
-              onChange={(event) =>
+            <details className="finder-optional">
+              <summary>Color, finish or left/right details (optional)</summary>
+              <label className="field-label" htmlFor="finish">
+                Color / Finish
+              </label>
+              <input
+                id="finish"
+                value={draft.finish}
+                maxLength={100}
+                onChange={(event) =>
+                  setDraft((previous) => ({
+                    ...previous,
+                    finish: event.target.value,
+                  }))
+                }
+              />
+              {definition?.orientation && (
+                <fieldset className="orientation-fieldset">
+                  <legend>Orientation</legend>
+                  <div className="inline-options">
+                    {(["left", "right", "not-sure"] as const).map((value) => (
+                      <label key={value}>
+                        <input
+                          type="radio"
+                          name="orientation"
+                          checked={draft.orientation === value}
+                          onChange={() =>
+                            setDraft((previous) => ({
+                              ...previous,
+                              orientation: value,
+                            }))
+                          }
+                        />
+                        {value === "not-sure"
+                          ? "Not Sure"
+                          : value === "left"
+                            ? "Left"
+                            : "Right"}
+                      </label>
+                    ))}
+                  </div>
+                  <Link
+                    className="measurement-help"
+                    href="/guides/measurements#orientation"
+                  >
+                    How to record orientation
+                  </Link>
+                </fieldset>
+              )}
+            </details>
+          </section>
+          <p className="field-hint">
+            Don&apos;t have a measuring tape handy? No problem! You can continue
+            without measurements.
+          </p>
+          <details
+            className="finder-optional"
+            name="measurements"
+            ref={measurementSection}
+          >
+            <summary>Have measurements? Add them here (optional)</summary>
+            <MeasurementFields
+              enabled={!!type}
+              key={type}
+              definition={definition}
+              group={group}
+              errors={errors}
+              onChange={(next) =>
                 setDraft((previous) => ({
                   ...previous,
-                  problem: event.target.value,
+                  measurementsByType: {
+                    ...previous.measurementsByType,
+                    [type]: next,
+                  },
                 }))
               }
-              placeholder="What is broken or not working? Include which side you viewed."
             />
-          </section>
+          </details>
           <div className="workflow-actions">
             <Link href={back} className="button button-secondary">
               Back

@@ -169,6 +169,7 @@ export function confirmFamily(
   if (!family) return draft;
   return {
     ...draft,
+    finderCategory: undefined,
     category: family.category,
     typesByCategory: {
       ...draft.typesByCategory,

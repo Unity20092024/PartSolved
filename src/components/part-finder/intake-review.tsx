@@ -10,8 +10,9 @@ import {
   selectedType,
   validateDraft,
 } from "@/lib/intake";
-import { categoryLabel, getPartType, partTypeLabel } from "@/config/part-types";
+import { getPartType, partTypeLabel } from "@/config/part-types";
 import { AssistanceNotes } from "./assistance/assistance-notes";
+import { finderCategoryLabel } from "@/config/finder-categories";
 import { guidedLabel } from "@/config/guided";
 export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
   const { photo, draft, guided, photoAssist } = usePhoto();
@@ -29,12 +30,6 @@ export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
     ...(["not-sure", "other"].includes(type)
       ? ["Specific hardware type needs clarification"]
       : []),
-    ...(request?.measurements
-      .filter((item) => item.status !== "provided")
-      .map(
-        (item) =>
-          `${definition?.measurements.find((field) => field.id === item.id)?.label}: ${item.status === "unknown" ? "Unknown" : "Not provided"}`,
-      ) ?? []),
     ...(!photo ? ["No photo attached"] : []),
   ];
   const actions = (
@@ -76,13 +71,11 @@ export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
   );
   return (
     <WorkflowShell
-      title={
-        nextSteps ? "Your Next Steps" : "Review Identification Information"
-      }
+      title={nextSteps ? "Your Next Steps" : "Review & Continue"}
       description={
         nextSteps
           ? "Use your recorded details to choose useful identification guidance."
-          : "Check your photo, measurements, and observations. You can edit any section."
+          : "Check what you’ve shared. You can edit anything or continue."
       }
       step={2}
       completedSteps={[...(photo ? [0] : []), ...(request ? [1] : [])]}
@@ -118,7 +111,7 @@ export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
               <div className="intake-card">
                 <h2>Identification information prepared</h2>
                 <p>
-                  {categoryLabel(request.category)} · {partTypeLabel(type)}
+                  {finderCategoryLabel(draft)} · {partTypeLabel(type)}
                 </p>
                 <p>
                   {
@@ -170,7 +163,7 @@ export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
                 <dl className="review-list">
                   <div>
                     <dt>Category</dt>
-                    <dd>{categoryLabel(request.category)}</dd>
+                    <dd>{finderCategoryLabel(draft)}</dd>
                   </div>
                   <div>
                     <dt>Part type</dt>
@@ -180,49 +173,50 @@ export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
               </section>
               <section className="intake-card">
                 <div className="review-heading">
-                  <h2>Measurements</h2>
+                  <h2>
+                    Measurements <span className="optional">(optional)</span>
+                  </h2>
                   <Link
                     className="text-button"
                     href="/find-part/details#measurements-title"
                   >
-                    Edit measurements
+                    Add or edit measurements
                   </Link>
                 </div>
-                <p className="field-hint">
-                  Provisional identification measurements only. They do not
-                  establish fit or compatibility.
-                </p>
-                <dl className="review-list">
-                  {request.measurements.map((item) => (
-                    <div key={item.id}>
-                      <dt>
-                        {
-                          definition?.measurements.find(
-                            (field) => field.id === item.id,
-                          )?.label
-                        }
-                      </dt>
-                      <dd>
-                        {item.status === "provided"
-                          ? `${item.enteredValue} ${item.unit}`
-                          : item.status === "unknown"
-                            ? "Unknown"
-                            : "Not provided"}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-                {!request.measurements.length && (
-                  <p>No structured measurements selected for this part type.</p>
+                {!request.measurements.some(
+                  (item) => item.status !== "missing",
+                ) && (
+                  <p>No measurements added. You can continue without them.</p>
                 )}
-                <h3>Measurement notes</h3>
-                <p className="preserve-lines">
-                  {request.measurementNotes || "Not provided"}
-                </p>
+                <dl className="review-list">
+                  {request.measurements
+                    .filter((item) => item.status !== "missing")
+                    .map((item) => (
+                      <div key={item.id}>
+                        <dt>
+                          {
+                            definition?.measurements.find(
+                              (field) => field.id === item.id,
+                            )?.label
+                          }
+                        </dt>
+                        <dd>
+                          {item.status === "provided"
+                            ? `${item.enteredValue} ${item.unit}`
+                            : item.status === "unknown"
+                              ? "Unknown"
+                              : "Not provided"}
+                        </dd>
+                      </div>
+                    ))}
+                </dl>
+                {request.measurementNotes && (
+                  <p className="preserve-lines">{request.measurementNotes}</p>
+                )}
               </section>
               <section className="intake-card">
                 <div className="review-heading">
-                  <h2>Markings &amp; Additional Details</h2>
+                  <h2>Your optional details</h2>
                   <Link
                     className="text-button"
                     href="/find-part/details#additional-title"
@@ -230,6 +224,13 @@ export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
                     Edit additional details
                   </Link>
                 </div>
+                {!request.manufacturer &&
+                  !request.markings &&
+                  !request.finish &&
+                  !request.problem &&
+                  request.orientation === "not-sure" && (
+                    <p>No extra details added (optional).</p>
+                  )}
                 <dl className="review-list">
                   {[
                     {
@@ -253,14 +254,16 @@ export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
                         ]
                       : []),
                     { label: "Problem / Notes", value: request.problem },
-                  ].map((item) => (
-                    <div key={item.label}>
-                      <dt>{item.label}</dt>
-                      <dd className="preserve-lines">
-                        {item.value || "Not provided"}
-                      </dd>
-                    </div>
-                  ))}
+                  ]
+                    .filter((item) => item.value && item.value !== "not-sure")
+                    .map((item) => (
+                      <div key={item.label}>
+                        <dt>{item.label}</dt>
+                        <dd className="preserve-lines">
+                          {item.value || "Not provided"}
+                        </dd>
+                      </div>
+                    ))}
                 </dl>
               </section>
               {guided.completed && (
@@ -308,7 +311,7 @@ export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
                 </section>
               )}
               <section className="intake-card missing-information">
-                <h2>Missing or unknown information</h2>
+                <h2>What you can add later</h2>
                 {missing.length ? (
                   <>
                     <ul>
@@ -323,8 +326,8 @@ export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
                   </>
                 ) : (
                   <p>
-                    All selected measurement prompts have values. This does not
-                    verify that the part has been correctly identified.
+                    You can add measurements or more details later. Your
+                    information does not verify fit or compatibility.
                   </p>
                 )}
                 <Link
@@ -349,7 +352,6 @@ export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
                   <ArrowRight size={18} aria-hidden="true" />
                 </Link>
               </div>
-              {actions}
             </>
           )}
         </>

@@ -179,7 +179,7 @@ test("visual patio problem, keyboard selection, changing answers, and details ha
     .click();
   await expect(page).toHaveURL("/find-part/details");
   await expect(
-    page.getByRole("radio", { name: "Door Hardware", exact: true }),
+    page.getByRole("radio", { name: "Sliding Patio Doors", exact: true }),
   ).toBeChecked();
   await expect(page.getByRole("combobox", { name: /Part Type/ })).toHaveValue(
     "patio-mortise-lock",
