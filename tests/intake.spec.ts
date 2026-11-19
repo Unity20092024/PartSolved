@@ -187,7 +187,7 @@ test("fractions and unit conversion, review/edit/next-step guidance, and local-o
   await expect(page.getByText("TEST-MARKING", { exact: true })).toBeVisible();
   await expect(
     page.getByRole("heading", {
-      name: "Automated product matching is not connected yet",
+      name: "Catalog search uses your written details",
     }),
   ).toBeVisible();
   await page.screenshot({

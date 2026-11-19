@@ -14,7 +14,9 @@
     "eval:ai": "node scripts/evaluate-photo-assist.mjs",
     "test:ai:reviewer": "node tests/helpers/reviewer-smoke.mjs",
     "test:catalog": "node tests/helpers/build-catalog-tests.mjs && node test-results/catalog/server-tests.cjs",
-    "test:catalog:db": "node tests/catalog/database.mjs"
+    "test:catalog:db": "node tests/catalog/database.mjs",
+    "test:finder-catalog": "node tests/helpers/build-finder-catalog-tests.mjs && node test-results/finder-catalog/server-tests.cjs",
+    "test:finder-catalog:integration": "node tests/finder-catalog/run.mjs"
   },
   "engines": {
     "node": ">=22.0.0"

@@ -10,6 +10,7 @@ export function WorkflowShell({
   completedSteps,
   optionalPhoto = false,
   photoAssistAvailable = false,
+  catalogSearch = false,
   back,
   onBack,
   children,
@@ -20,11 +21,12 @@ export function WorkflowShell({
   completedSteps?: number[];
   optionalPhoto?: boolean;
   photoAssistAvailable?: boolean;
+  catalogSearch?: boolean;
   back: string;
   onBack?: () => void;
   children: ReactNode;
 }) {
-  const { photoAssist } = usePhoto();
+  const { photoAssist, draft } = usePhoto();
   const steps = [
     { label: "Photo", href: "/find-part/preview" },
     { label: "Details", href: "/find-part/details" },
@@ -103,9 +105,11 @@ export function WorkflowShell({
       <p className="workflow-description">{description}</p>
       {children}
       <p className="workflow-privacy">
-        {photoAssistAvailable || photoAssist.requested
-          ? "Your originals and written answers stay in this tab’s memory and clear on refresh. Analyze Photo sends only selected photos to OpenAI after your agreement. PartSolved does not permanently save them. Automated product matching is not connected."
-          : "Your photo and answers stay in this tab’s memory. Refreshing or closing the tab clears this workflow. Nothing is uploaded or submitted for matching."}
+        {catalogSearch || draft.catalogSearchRequested
+          ? "Catalog search sends written details only. It does not send or analyze photos. Your browser copy clears on refresh. Any separately agreed AI Photo Assist is independent."
+          : photoAssistAvailable || photoAssist.requested
+            ? "Your originals and written answers stay in this tab’s memory and clear on refresh. Analyze Photo sends only selected photos to OpenAI after your agreement. PartSolved does not permanently save them. Automated product matching is not connected."
+            : "Your photo and answers stay in this tab’s memory. Refreshing or closing the tab clears this workflow. Nothing is uploaded or submitted for matching."}
       </p>
     </main>
   );

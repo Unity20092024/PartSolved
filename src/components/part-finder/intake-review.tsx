@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, BookOpen, ListChecks, Pencil } from "lucide-react";
 import { usePhoto } from "./photo-provider";
 import { WorkflowShell } from "./workflow-shell";
+import { CatalogSearchEntry } from "./catalog-search-entry";
 import { PhotoPreview } from "./photo-preview";
 import { PhotoRecovery } from "./photo-recovery";
 import {
@@ -15,7 +16,7 @@ import { AssistanceNotes } from "./assistance/assistance-notes";
 import { finderCategoryLabel } from "@/config/finder-categories";
 import { guidedLabel } from "@/config/guided";
 export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
-  const { photo, draft, guided, photoAssist } = usePhoto();
+  const { photo, draft, guided } = usePhoto();
   const errors = validateDraft(draft),
     type = selectedType(draft),
     definition = getPartType(type);
@@ -99,11 +100,12 @@ export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
       ) : (
         <>
           <div className="info-notice" role="status">
-            <h2>Automated product matching is not connected yet</h2>
+            <h2>Catalog search uses your written details</h2>
             <p>
-              {photoAssist.requested
-                ? "Your written answers remain local. AI Photo Assist is separate from catalog matching. No products have been identified, and compatibility has not been verified."
-                : "Your information is kept locally for this workflow. No photo has been submitted, no products have been identified, and compatibility has not been verified."}
+              Your photo is not analyzed or sent with catalog search. Automated
+              photo-to-product matching is not connected. Catalog candidates
+              still need fit and compatibility checks. Any separately agreed AI
+              Photo Assist is independent.
             </p>
           </div>
           {nextSteps ? (
@@ -128,6 +130,7 @@ export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
                   Review all information
                 </Link>
               </div>
+              <CatalogSearchEntry />
               {actions}
             </>
           ) : (
@@ -337,6 +340,7 @@ export function IntakeReview({ nextSteps = false }: { nextSteps?: boolean }) {
                   Get help with missing measurements
                 </Link>
               </section>
+              <CatalogSearchEntry />
               <div className="workflow-actions">
                 <Link
                   href="/find-part/details"
