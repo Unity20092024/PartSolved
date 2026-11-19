@@ -20,13 +20,20 @@ async function openDetails(page: Page) {
   await page.getByRole("link", { name: "Continue to Add Details" }).click();
   await expect(page).toHaveURL("/find-part/details");
 }
+async function expandMeasurements(page: Page) {
+  const section = page.locator("details[name=measurements]");
+  if (
+    !(await section.getAttribute("open")) &&
+    !(await section.evaluate((el) => (el as HTMLDetailsElement).open))
+  )
+    await section.locator("summary").click();
+}
 async function chooseOperator(page: Page) {
-  await page
-    .getByRole("radio", { name: "Window Hardware", exact: true })
-    .check();
+  await page.getByRole("radio", { name: "Windows", exact: true }).check();
   await page
     .getByRole("combobox", { name: /Part Type/ })
     .selectOption("casement-operator");
+  await expandMeasurements(page);
 }
 async function detailsToReview(page: Page) {
   await page.getByRole("button", { name: "Continue to Review" }).click();
@@ -73,16 +80,15 @@ test("empty required choices, invalid fractions, unknown values and keyboard err
   await page.getByRole("button", { name: "Continue to Review" }).click();
   await expect(page.locator(".error-summary")).toBeFocused();
   await expect(page.locator(".error-summary")).toContainText("select Not Sure");
-  await page
-    .getByRole("radio", { name: "Window Hardware", exact: true })
-    .focus();
+  await page.getByRole("radio", { name: "Windows", exact: true }).focus();
   await page.keyboard.press("Space");
   await expect(
-    page.getByRole("radio", { name: "Window Hardware", exact: true }),
+    page.getByRole("radio", { name: "Windows", exact: true }),
   ).toBeChecked();
   await page
     .getByRole("combobox", { name: /Part Type/ })
     .selectOption("casement-operator");
+  await expandMeasurements(page);
   await page.locator("#measure-arm-length").fill("1/0");
   await page.getByRole("button", { name: "Continue to Review" }).click();
   await expect(page.locator("#measure-arm-length")).toHaveAttribute(
@@ -95,11 +101,15 @@ test("empty required choices, invalid fractions, unknown values and keyboard err
     .filter({ has: page.locator("#measure-arm-length") })
     .getByRole("checkbox", { name: "Unknown" });
   await unknown.check();
+  await expect(page.locator("details[name=measurements]")).toHaveAttribute(
+    "open",
+    "",
+  );
   await expect(page.locator("#measure-arm-length")).toBeDisabled();
   await detailsToReview(page);
   await expect(page.getByText("Unknown", { exact: true })).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Missing or unknown information" }),
+    page.getByRole("heading", { name: "What you can add later" }),
   ).toBeVisible();
 });
 
@@ -115,7 +125,9 @@ test("dynamic category/type options and measurement state survive changes and ba
   await page
     .getByLabel("Manufacturer / Brand", { exact: true })
     .fill("Visible brand");
-  await page.getByRole("radio", { name: "Door Parts", exact: true }).check();
+  await page
+    .getByRole("radio", { name: "Sliding Patio Doors", exact: true })
+    .check();
   await expect(page.getByRole("combobox", { name: /Part Type/ })).toHaveValue(
     "",
   );
@@ -127,9 +139,7 @@ test("dynamic category/type options and measurement state survive changes and ba
     .selectOption("patio-roller");
   await expect(page.locator(".measurement-field")).toHaveCount(5);
   await page.locator("#measure-roller-diameter").fill("1.25");
-  await page
-    .getByRole("radio", { name: "Window Hardware", exact: true })
-    .check();
+  await page.getByRole("radio", { name: "Windows", exact: true }).check();
   await expect(page.locator("#part-type")).toHaveValue("casement-operator");
   await expect(page.locator("#measure-arm-length")).toHaveValue("5 1/2");
   await expect(page.locator("#measurement-notes")).toHaveValue(
@@ -143,7 +153,9 @@ test("dynamic category/type options and measurement state survive changes and ba
   await page.getByRole("link", { name: "Continue to Add Details" }).click();
   await expect(page.locator("#measure-arm-length")).toHaveValue("5 1/2");
   await expect(page.getByAltText("Your selected part photo")).toBeVisible();
-  await page.getByRole("radio", { name: "Door Parts", exact: true }).check();
+  await page
+    .getByRole("radio", { name: "Sliding Patio Doors", exact: true })
+    .check();
   await expect(page.locator("#part-type")).toHaveValue("patio-roller");
   await expect(page.locator("#measure-roller-diameter")).toHaveValue("1.25");
 });
@@ -183,7 +195,7 @@ test("fractions and unit conversion, review/edit/next-step guidance, and local-o
     fullPage: true,
   });
   await page
-    .getByRole("link", { name: "Edit measurements", exact: true })
+    .getByRole("link", { name: "Add or edit measurements", exact: true })
     .click();
   await page.locator("#measure-arm-length").fill("140");
   await detailsToReview(page);
@@ -220,6 +232,7 @@ test("Not Sure category and part type can complete review without invented match
   await page
     .getByRole("combobox", { name: /Part Type/ })
     .selectOption("not-sure");
+  await expandMeasurements(page);
   await page
     .locator("#measurement-notes")
     .fill("Unsure of the mounting points");
@@ -325,7 +338,9 @@ test("guided all-unknown journey and no-candidate path provide useful guidance",
     .check();
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Still Not Sure? We Can Help You Figure It Out." }),
+    page.getByRole("heading", {
+      name: "Still Not Sure? We Can Help You Figure It Out.",
+    }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Use these answers" }).click();
   await detailsToReview(page);
@@ -345,20 +360,21 @@ test("all provisional hardware measurement schemas render the intended distinct 
 }) => {
   await openDetails(page);
   const scenarios = [
-    ["Window Hardware", "casement-operator", "Arm length"],
-    ["Window Hardware", "sash-cam-lock", "Keeper height"],
-    ["Window Hardware", "track-fin-lock", "Track or fin width"],
-    ["Window Parts", "spiral-balance", "Tube diameter"],
-    ["Window Parts", "channel-balance", "Channel depth"],
-    ["Door Hardware", "patio-mortise-lock", "Lock backset"],
-    ["Door Hardware", "patio-handle-set", "Door thickness"],
-    ["Door Hardware", "push-button-latch", "Latch reach"],
-    ["Door Parts", "patio-roller", "Housing height"],
-    ["Door Parts", "storm-closer", "Cylinder diameter"],
+    ["Windows", "casement-operator", "Arm length"],
+    ["Windows", "sash-cam-lock", "Keeper height"],
+    ["Windows", "track-fin-lock", "Track or fin width"],
+    ["Windows", "spiral-balance", "Tube diameter"],
+    ["Windows", "channel-balance", "Channel depth"],
+    ["Sliding Patio Doors", "patio-mortise-lock", "Lock backset"],
+    ["Sliding Patio Doors", "patio-handle-set", "Door thickness"],
+    ["Storm & Screen Doors", "push-button-latch", "Latch reach"],
+    ["Sliding Patio Doors", "patio-roller", "Housing height"],
+    ["Storm & Screen Doors", "storm-closer", "Cylinder diameter"],
   ];
   for (const [category, type, field] of scenarios) {
     await page.getByRole("radio", { name: category, exact: true }).check();
     await page.locator("#part-type").selectOption(type);
+    await expandMeasurements(page);
     await expect(
       page.getByRole("textbox", { name: `${field} (in)`, exact: true }),
     ).toBeVisible();

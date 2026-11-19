@@ -124,6 +124,7 @@ export function adoptFamily(
   return {
     ...draft,
     source: "guided",
+    finderCategory: undefined,
     category: family.category,
     typesByCategory: {
       ...draft.typesByCategory,

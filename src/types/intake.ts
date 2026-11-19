@@ -40,6 +40,9 @@ export interface MeasurementGroup {
   notes: string;
 }
 export interface IntakeDraft {
+  /** Browser-only presentation metadata; not a catalog category or request schema change. */
+  finderCategory?: import("@/config/finder-categories").FinderCategory;
+  typesByFinderCategory?: Record<string, string>;
   source: "photo" | "guided";
   category: HardwareCategory | "";
   typesByCategory: Record<string, string>;

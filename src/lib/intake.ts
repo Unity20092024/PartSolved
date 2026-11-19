@@ -178,6 +178,7 @@ export function applyGuidedAnswers(
   return {
     ...draft,
     source: "guided",
+    finderCategory: undefined,
     category: suggestion.category,
     typesByCategory: {
       ...draft.typesByCategory,
